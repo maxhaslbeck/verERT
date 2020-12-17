@@ -1,12 +1,26 @@
 \<^marker>\<open>creator "Maximilian P. L. Haslbeck"\<close>
-theory StateProg
-imports MDP_Semantics PGCL_Misc
+chapter "PGCL with explicit state"
+theory PGCL_With_State
+imports PGCL_Misc
 begin
 
+paragraph \<open>Summary\<close>
+
+text \<open>This theory formalizes the basics needed to formalize the new proof rule for expected 
+    running time transformer ERT for f-iid loops. We follow the exposition of @{cite batzESOP18}.
+
+    We build upon the definitions of @{term ert} and @{term wp} for the general pGCL.\<close>
 
 
+paragraph \<open>Main definitions\<close>
 
-section "PGCL with explicit state"
+text \<open>
+  \<^item> we define the language spGCL that comes with a state. in contrast to pGCL it does not have
+      Empty and Halt. 
+  \<^item> compile: compiles a spGCL into a general pGCL program\<close>
+
+
+section \<open>The type spGCL\<close>
 
 type_synonym vname = string
 type_synonym val = nat
@@ -33,6 +47,8 @@ fun compile :: "spgcl \<Rightarrow> state pgcl" where
 | "compile (If b c1 c2) = PGCL.If b (compile c1) (compile c2)" 
 | "compile (While b c) = PGCL.While b (compile c)" 
 
+text  \<open>The name might be confusing. It signifies, that no non-deterministic choice is involved,
+    only deterministic programs, with probabilistic choice.\<close>
 
 fun deter :: "spgcl \<Rightarrow> bool" where
  "deter Skip = True"
@@ -45,10 +61,12 @@ fun deter :: "spgcl \<Rightarrow> bool" where
 | "deter (While b c) = deter c"
 
 
+lemma awp_is_wp_if_deter: "deter C \<Longrightarrow> awp (compile C) f = wp (compile C) f"
+  apply(induct C arbitrary: f) apply auto by presburger 
 
-
-
-
+(* conjecture *) 
+lemma "fully_probabilistic (compile p) \<longleftrightarrow> deter p"
+  oops
 
 type_synonym exp = "(state \<Rightarrow> ennreal)"
 
@@ -133,10 +151,11 @@ lemma ert_sup: "ert (compile (While b C)) f = (\<Squnion>i. ((charaErt b C f) ^^
 
 subsection "Decompose ert into wp and ert"
 
-(* this stems from spgcl being deterministic *)
+text \<open>The following lemma only works for deterministic spgcl programs. 
+        It is lemma A.15 from @{cite olmedo2016}. \<close>
 
 lemma 
-  decompose_wpert: (* Olmedo,Kaminski,Katoen,Matheja - Reasoning about Recursive Probabilistic Programs *)
+  decompose_wpert:
   "deter C \<Longrightarrow> ert (compile C) (f+g) =  ert (compile C) f + wp (compile C) g"
 proof (induct C arbitrary: f g) 
   case (Seq C1 C2)
@@ -198,8 +217,12 @@ corollary decompose_ert': "deter C \<Longrightarrow> ert (compile C) (f+g) s =  
 
 subsection "Linearity of wp" 
 
-lemma wp_linear: "deter C \<Longrightarrow> a < \<infinity> \<Longrightarrow> wp (compile C) ((\<lambda>s. a * f1 s) + f2) = (\<lambda>s. (a::ennreal) * wp (compile C) f1 s) + wp (compile C) f2"
-  (is "_ \<Longrightarrow> _ \<Longrightarrow> ?P C f1 f2 a")
+lemma wp_linear: 
+  assumes "deter C" "a < \<infinity>"
+  shows "wp (compile C) ((\<lambda>s. a * f1 s) + f2)
+           = (\<lambda>s. (a::ennreal) * wp (compile C) f1 s) + wp (compile C) f2"
+  (is "?P C f1 f2 a")
+  using assms
 proof (induct C arbitrary: f1 f2 a)
   case (Assign x1 x2)
   then show ?case   by (auto simp add: nn_integral_add  nn_integral_cmult)

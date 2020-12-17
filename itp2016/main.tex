@@ -1,0 +1,365 @@
+\documentclass[a4paper]{llncs}
+
+\usepackage{etex}
+\usepackage{nag}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{amsmath,amssymb,stmaryrd}
+\usepackage{cite}
+\usepackage{tikz}
+\usetikzlibrary{matrix,positioning,backgrounds,shapes,automata,fit}
+\usepackage{mathpartir}
+
+\usepackage[
+  pdftex,
+  pdfusetitle,
+  pdfborder={0 0 0}]{hyperref}
+
+\usepackage{fixme}
+\fxsetup{
+ status=draft
+}
+
+\renewcommand*\sectionautorefname{Section}
+\renewcommand*\subsectionautorefname{Section}
+\renewcommand*\subsubsectionautorefname{Section}
+\newcommand{\etal}{\emph{et~al.}}
+
+\include{isamarkup}
+\include{isadecl}
+
+\DeclareIsaConst{ert}{\isaconst{ert}}
+\DeclareIsaConst{cost}{\isaconst{cost}}
+\DeclareIsaConst{K}{\isaconst{K}}
+
+\hyphenation{Isa-belle hy-poth-esis co-data-type co-data-types
+  co-al-ge-bra co-al-ge-bras co-al-ge-bra-ic co-in-duct co-in-duct-ive
+  co-in-duct-ion co-re-cur-sor co-re-cur-sors co-re-cur-sion co-re-cur-sive
+  meas-sur-able}
+
+\pagestyle{plain}
+
+\title{Formalising Semantics for Expected Running Time of Probabilistic Programs \\ (Rough Diamond)}
+\author{Johannes Hölzl}
+\authorrunning{J. Hölzl}
+\titlerunning{Expected Running Time of Probabilistic Programs}
+\institute{Fakultät für Informatik, TU München, \email{hoelzl@in.tum.de}}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+We formalise two semantics observing the expected running time of pGCL programs.
+The first semantics is a denotational semantics providing a direct computation of the running time, similar to the weakest pre-expectation transformer.
+The second semantics interprets a pGCL program in terms of a Markov decision process (MDPs), i.e.~it provides an operational semantics.
+Finally we show the equivalence of both running time semantics.
+
+We want to use this work to implement a program logic in Isabelle/HOL to verify the expected running time of pGCL programs.
+We base it on recent work by Kaminski, Katoen, Matheja, and Olmedo.
+We also formalise the expected running time for a simple symmetric random walk discovering a flaw in the original proof.
+
+\end{abstract}
+
+\section{Introduction}\label{introduction}
+
+We want to implement expected running time analysis in Isabelle/HOL based on Kaminski~\etal~\cite{kaminski2016ert}.
+They present semantics and proof rules to analyse the expected running time of probabilistic guarded command language (pGCL) programs.
+pGCL is an interesting programming language as it admits probabilistic and non-deterministic choice, as well as unbounded while loops~\cite{mciver2004arp}.
+
+Following \cite{kaminski2016ert}, in \autoref{sec:mdp} we formalise two running time semantics for pGCL and show their equivalence: a denotational one expressed as expectation transformer of type \isa{(\tv{s} \t{=>} \t{ennreal}) \t{=>} (\tv{s} \t{=>} \t{ennreal})}, and a operational one defining a Markov decision process (MDP).
+This proof follows the equivalence proof of pGCL semantics on the expectation of program variables in \cite{hoelzl2016mdp} derived from the pen-and-paper proof by Gretz \etal~\cite{gretz2014pgclsem}.
+
+Based on these formalisations we analyse the simple symmetric random walk, and show that the expected running time is infinite.
+We started with the proof provided in \cite{kaminski2016ert}, but we discovered a flaw in the proof of the lower $\omega$-invariant based on the denotational semantics. 
+Now, our solution combines results from the probability measure of the operational semantics and the fixed point solution from the denotational semantics.
+
+Both proofs are based on our formalisation of Markov chains and MDPs~\cite{hoelzl2016mdp}. The formalisation in this paper is on BitBucket%
+\footnote{\url{https://bitbucket.org/johannes2011/avgrun}}.
+
+\section{Preliminaries}
+
+The formulas in this paper are oriented on Isabelle's syntax: type annotations are written \isa{t \hastype \tv{t}}, type variables can be annotated with type classes \isa{t \hastype \tv{t} \hastype \mathit{tc}} (i.e.~\isa{t} has type \isa{\tv{t}} which is in type class \isa{\mathit{tc}}), and type constructors are written in post-fix notation: e.g.~\isa{\t{set}{\tv{a}}}. We write \isa{\t{int}} for integers, \isa{\t{ennreal}} for extended non-negative real numbers: $[0, \infty]$, \isa{\t{stream}{\tv{a}}} for infinite streams of \isa{\tv{a}}, \isa{\t{pmf}{\tv{a}}} for probability mass functions (i.e.~discrete distributions) on \isa{\tv{a}}. The state space is usually the type variable \isa{\tv{s}}.
+On infinite streams \isa{\c{sdrop}~n~\omega} drops the first $n$ elements from the stream $\omega$: \isa{\c{sdrop}~0~\omega = \omega} and \isa{\c{sdrop}~(n+1)~(s{\cdot}\omega) = \c{sdrop}~n~\omega}.
+
+\paragraph{Least fixed points}
+A central tool to define semantics are least fixed points on complete lattices: \isa{\tv{a}\t{=>}(\tv{b}\hastype\t{completelattice})}, \isa{\t{bool}}, \isa{\t{enat}}, and \isa{\t{ennreal}}.
+Least fixed points are defined as \isa{\c{lfp}~f = \bigsqcap \{ u \mid f\,u \le u \} }.
+For a monotone function $f$, we get the equations \isa{\c{lfp}\,f = f\,(\c{lfp}\,f)}.
+Fixed point theory also gives nice algebraic rules: the rolling rule ``rolls'' a composed fixed point: \isa{g\,(\c{lfp}\,(\lambda x.~f\,(g\,x))) = \c{lfp}\,(\lambda x.~g\,(f\,x)))} for monotone $f$ and $g$, and the diagonal rule for nested fixed points: \isa{\c{lfp}\,(\lambda x.~\c{lfp}\,(f\,x)) = \c{lfp}\,(\lambda x.~f\,x\,x)}, for $f$ monotone in both arguments.
+
+To use least fixed points in measure theory, countable approximations are necessary.
+This is possible if the function $f$ is sup-continuous: $f\,(\bigsqcup_i C\,i) = \bigsqcup_i f\,(C\,i)$ for all chains~$C$.
+Then $f$ is monotone and \isa{\c{lfp}\,f = \bigsqcup_i f^i\,\bot}.
+For our proofs we also need an induction and a transfer rule%
+\footnote{In our formalisation, the transfer rule is stronger: expectation requires measurability, hence we restrict the elements to which we apply $\alpha$ by some predicate~$P$.}:
+%
+\begin{mathpar}
+\inferrule{\isa{\c{mono}\,f} \\
+  \isa{\forall x \le \c{lfp}\,f.~P\,x \c{-->} P\,(f\,x)} \\
+  \isa{\forall S.~(\forall x \in S.~P\,x) \c{-->} P\,(\bigsqcup S)}
+}{\isa{P\,(\c{lfp}\,f)}} \and
+\inferrule{\isa{\c{supcontinuous}\,f, g, \textrm{and}~\alpha} \\
+\isa{\alpha\,\bot \le \c{lfp}\,g} \\ \alpha \circ f = g \circ \alpha}%
+{\isa{\alpha (\c{lfp}\,f) = \c{lfp}\,g}}
+\end{mathpar}
+
+\paragraph{Markov chains (MCs) and Markov decision processes (MDPs)}
+An overview of Isabelle's MC and MDP theory is found in~\cite{hoelzl2016mdp, hoelzl2013thesis}.
+A MC is defined by a transition function \isa{K \hastype \tv{a}\t{=>}\t{pmf}{\tv{a}}}, inducing an expectation: \isa{\mathbb{E}^K_s[f]} is the expectation of $f$ over all traces in $K$ starting in $s$.
+A MDP is defined by a transition function \isa{K \hastype \tv{a}\t{=>}\t{set}{\t{pmf}{\tv{a}}}}, inducing the maximal expectation: \isa{\hat{\mathbb{E}}^{K}_s[f]} is the supremum of all expectation of $f$ over all traces in $K$ starting in $s$.
+Both expectations \isa{\mathbb{E}^K_s[f]} and \isa{\hat{\mathbb{E}}^K_s[f]} have values in \isa{\t{ennreal}}, which is a complete lattice.
+Both are sup-continuous on measurable functions (called \emph{monotone convergent} in measure theory), which allows us to apply the transfer rule when $f$ is defined as a least fixed point.
+Also both expectations support an iteration rule, i.e. we can compute them by first taking a step in $K$ and then continue in the resulting state $t$:
+%
+\[ \isa{\mathbb{E}^K_s[f] = \int_t \mathbb{E}^K_t[\lambda \omega.~f(t\cdot\omega)] \mathsf{d}K_s} \quad \textrm{and} \quad
+\isa{\hat{\mathbb{E}}^K_s[f] = \bigsqcup_{D \in K_s} \int_t \hat{\mathbb{E}}^K_t[\lambda \omega.~f(t\cdot\omega)] \mathsf{d}D}. \]
+%
+Where $t\cdot\omega$ is the stream constructor and $\int f\mathsf{d}D$ is the integral over the pmf~$D$.
+
+\section{Probabilistic Guarded Command Language (pGCL)}
+
+The probabilistic guarded command language (pGCL) is a simple programming language allowing probabilistic assignment, non-deterministic choice and arbitrary While-loops. A thorough description of it using the weakest pre-expectation transformer (wp) semantics is found in McIver and Morgan~\cite{mciver2004arp}. Gretz~\etal~\cite{gretz2014pgclsem} shows the equivalence of wp with a operational semantics based on MDPs.
+Hurd~\cite{hurd2005pgcl} and Cock~\cite{cock2012pgcl} provide a shallow embedding of pGCL in HOL4 and Isabelle/HOL.
+We follow the definition in Kaminski~\etal~\cite{kaminski2016ert}.
+
+\begin{figure}[t]
+\[ \isa{ \begin{array}{lcl@{~|~}l}
+\t{pgcl}{\tv{s}} & = & \c{Empty} ~~~~|~~~~ \c{Skip} ~~~~|~~~~ \c{Halt}
+& \c{Assign}~(\tv{s} \t{=>} \t{pmf}{\tv{s}}) \\
+& | & \c{Seq}~(\t{pgcl}{\tv{s}})~(\t{pgcl}{\tv{s}}) 
+& \c{Par}~(\t{pgcl}{\tv{s}})~(\t{pgcl}{\tv{s}}) \\
+& | & \c{If}~(\tv{s} \t{=>} \t{bool})~(\t{pgcl}{\tv{s}})~(\t{pgcl}{\tv{s}})
+& \c{While}~(\tv{s} \t{=>} \t{bool})~(\t{pgcl}{\tv{s}})
+\end{array} } \]
+\caption{pGCL syntax}\label{fig:syntax}
+\end{figure}
+%
+In \autoref{fig:syntax} we define a datatype representing pGCL programs over an arbitrary program state of type~\isa{\tv{s}}.
+\isa{\c{Empty}} has not running time.
+\isa{\c{Halt}} immediately aborts the program.
+\isa{\c{Seq}} is for sequential composition.
+\isa{\c{Par}} is for non-deterministic choice, i.e.~both commands are executed and then one of the results is chosen.
+\isa{\c{Assign}}, \isa{\c{If}}, and \isa{\c{While}} have the expected behaviour, and all three commands require one time step.
+A probabilistic choice is possible with \isa{\c{Assign}~u}, where $u$ is a probabilistic state transformer (\isa{\tv{s} \t{=>} \t{pmf}{\tv{s}}}).
+The expected running time of \isa{\c{Assign}~u} weights each possible running time with the outcome of $u$.
+The assignment is deterministic is $u$ is a Dirac distribution, i.e.~assigning probability $1$ to exactly one value.
+We need the datatype to have a deep embedding of pGCL programs, which is necessary for the construction of the MDP.
+
+\begin{figure}[t]
+\begin{flalign*} \isa{ \begin{array}{lccl}
+\multicolumn{4}{l}{%
+\c{ert} \hastype \t{pgcl}{\tv{s}} \t{=>} (\tv{s} \t{=>} \t{ennreal}) \t{=>} (\tv{s} \t{=>} \t{ennreal})} \\
+\c{ert}~\c{Empty} & f & = &
+f \\
+\c{ert}~\c{Skip} & f & = &
+1 + f \\
+\c{ert}~\c{Halt} & f & = & 
+0 \\
+\c{ert}~(\c{Assign}~u) & f & = & 1 +
+\displaystyle \lambda x.\, \int_y f\,y ~d(u\,x) \\
+\c{ert}~(\c{Seq}~c_1~c_2) & f & = &
+\c{ert}~c_1~(\c{ert}~c_2~f) \\
+\c{ert}~(\c{Par}~c_1~c_2) & f & = &
+\c{ert}~c_1~f \sqcup \c{ert}~c_2~f \\
+\c{ert}~(\c{If}~g~c_1~c_2) & f & = &
+1 + \lambda x.\, \c{if} g~x \c{then} \c{ert}~c_1~f~x \c{else} \c{ert}~c_2~f~x \\
+\c{ert}~(\c{While}~g~c) & f & = &
+\c{lfp}~(\lambda W\,x.\, 1 + \c{if} g~x \c{then} \c{ert}~c~W\,x \c{else} f~x)
+\end{array} } \end{flalign*}
+\caption{Expectation transformer semantics for pGCL running times}\label{fig:ert}
+\end{figure}
+
+\begin{figure}[t]
+\[ \isa{ \begin{array}{lccl}
+\multicolumn{4}{l}{%
+\c{K} \hastype (\t{pgcl}{\tv{s}} \t{*} \tv{s}) \t{=>} \t{set}{\t{pmf}{(\t{pgcl}{\tv{s}} \t{*} \tv{s})}}} \\
+\c{K} (\c{Empty},&s) & = &
+\c{det}{\c{Empty}}{s} \\
+\c{K} (\c{Skip},&s) & = &
+\c{det}{\c{Empty}}{s} \\
+\c{K} (\c{Halt},&s) & = &
+\c{det}{\c{Halt}}{s} \\
+\c{K} (\c{Assign}~u,&s) & = &
+\{ [\lambda s'.\, (\c{Empty}, s')]~(u~s) \} \\
+\c{K} (\c{Seq}~c_1~c_2,&s) & = & \left[\lambda (c', s').\, \left(\left\{ %
+\begin{array}{ll}
+c_2 & \textrm{if}~c'= \c{Empty} \\
+\c{Halt} & \textrm{if}~c'= \c{Halt} \\
+\c{Seq}~c'~c_2 & \textrm{otherwise}
+\end{array} %
+\right\}, s'\right)\right]~\c{K}~(c_1, s) \\
+\c{K} (\c{Par}~c_1~c_2,&s) & = & 
+\c{det}{c_1}{s} \cup \c{det}{c_2}{s} \\
+\c{K} (\c{If}~g~c_1~c_2,&s) & = &
+\c{if} g\, s \c{then}~ \c{det}{c_1}{s} ~\c{else}~ \c{det}{c_2}{s} \\
+\c{K} (\c{While}~g~c,&s) & = &
+\c{if} g\,s \c{then}~ \c{det}{\c{Seq}~c~(\c{While}~g~c)}{s} ~\c{else}~ \c{det}{\c{Empty}}{s}
+\end{array} } \]
+%
+\[ \isa{ \begin{array}{lllccl@{\qquad\qquad}lllccl}
+\multicolumn{12}{l}{%
+\c{cost} \hastype (\tv{s} \t{=>} \t{ennreal}) \t{=>} \t{pgcl}{\tv{s}} \t{=>} \tv{s} \t{=>} \t{ennreal} \t{=>} \t{ennreal}} \\
+\c{cost}~f&\c{Empty} & s & \c{_} & = & f s &
+\c{cost}~\c{_}&(\c{Seq}~\c{Empty}~\c{_}) & \c{_} & x & = & x \\
+\c{cost}~\c{_}&\c{Halt} & \c{_} & \c{_} & = & 0 &
+\c{cost}~f&(\c{Seq}~c~\c{_}) & s & x & = & \c{cost}~f~c~s~x \\
+\c{cost}~\c{_}&(\c{Par}\;\c{_}\,\c{_}) & s & x & = & x &
+\c{cost}~\c{_}&\c{_} & \c{_} & x & = & 1 + x
+\end{array} } \]
+\begin{center}
+  \isa{\c{det}{c}{s}} is the singleton set of the singleton distribution $(c, s)$.\\
+  $[f]\mu$ maps $f$ over all elements of $\mu$
+\end{center}
+%
+\caption{MDP semantics for pGCL running times}\label{fig:mdp}
+\end{figure}
+
+\paragraph{Expected Running Time}
+
+The denotational semantics for the running time is given as an expectation transformer, which is similar to the denotational semantics for the expectation of program variables as weakest pre-expectation transformers.
+Again we follow the definition in Kaminski~\etal~\cite{kaminski2016ert}.
+In \autoref{fig:ert} we define the expectation transformer \isa{\c{ert}} taking a pGCL command $c$ and an expectation $f$, where $f$ assigns an expected running time to each terminal state of $c$.
+This gives a simple recursive definition of the \isa{\c{Seq}} case, for the expected running time of a pGCL program we will set $f = 0$.
+We proved some validating theorems about expectation transformer \isa{\c{ert}}, i.e.~continuity and monotonicity of \isa{\c{ert}~c}, closed under constant addition for \isa{\c{Halt}}-free programs, sub-additivitiy, etc.  
+
+\paragraph{MDP Semantics}\label{sec:mdp}
+
+For the operational small-step semantics we introduce a MDP constructed per pGCL program, and compute the expected number of steps until the program terminates.
+In \autoref{fig:mdp} we define the MDP by its transition function $K$ and the per-state cost function \isa{\c{cost}~f~c~s~x}.
+The per-state cost \isa{\c{cost}~f~c~s~x} computes the running time cost associated with the program $c$ at state $s$.
+Here the program is seen as a list of statements, hence we walk along a list of \isa{\c{Seq}} and only look at its left-most leaf.
+If the program is \isa{\c{Empty}} the MDP is stopped and we return $f~s$ containing further running time cost we want to associated to a finished state $s$ (in most cases this will be $0$, but it is essential in the induction case of \autoref{thm:erteq}).
+When the execution continues we also add~$x$, c.f.~the definition of \isa{\c{coststream}}.
+
+The transition function $K$ induces now a set of trace spaces, one for each possible resolution of the non-deterministic choices introduced by \isa{\c{Par}}.
+We write $\hat{\mathbb{E}}^{K}_{(c, s)}[f]$ for the maximal expectation of \isa{f \hastype \t{stream}{(\t{pgcl}{\tv{s}} \t{*} \tv{s})} \t{=>} \t{ennreal}} when the MDP starts in $(c, s)$.   
+We define the cost of a trace as the sum of \isa{\c{cost}} over all states in the trace:
+%
+\[ \isa{\c{coststream}~f~((c, s){\cdot}\omega) \stackrel{\c{lfp}}{=} \c{cost}~f~c~s~(\c{coststream}~f~\omega)} \]
+%
+Finally the maximal expectation of \isa{\c{coststream}} computes \isa{\c{ert}}:%
+\begin{theorem}\label{thm:erteq}
+$ \isa{\hat{\mathbb{E}}^{K}_{(c, s)}[\c{coststream}~f] = \c{ert}~c~f~s} $
+\end{theorem}
+\begin{proof}[Induction on $c$] The interesting cases are \isa{\c{Seq}} and \isa{\c{While}}.
+For \isa{\c{Seq}} we prove the equation 
+\isa{\hat{\mathbb{E}}^{K}_{(\c{Seq}~a~b, s)}[\c{coststream}~f] 
+  = \hat{\mathbb{E}}^{K}_{(a, s)}[\c{coststream}~(\lambda s.~\hat{\mathbb{E}}^{K}_{(b, s)}[\c{coststream}~f])]},
+by fixed point induction in both directions.
+For \isa{\c{While}} we prove
+\[\isa{\hat{\mathbb{E}}^{K}_{(\c{While}~g~c, s)}[\c{coststream}~f] =
+\c{lfp}~(\lambda F\;s.\;1+\c{if} g\,s \c{then} \hat{\mathbb{E}}^{K}_{(c, s)}[\c{coststream}~f] \c{else} f\;s)\;s}\]
+by equating it to a completely unrolled version using fixed point induction and then massaging it in the right form using the rolling and diagonal rules. \qed
+\end{proof}
+
+\section{Simple Symmetric Random Walk}\label{sec:ssrw}
+
+As an application for the expected running time analysis Kaminski~\etal~\cite{kaminski2016ert} chose the simple random walk.
+As difference to \cite{kaminski2016ert} we do not use $\omega$-invariants to prove the infinite running time, but the correspondence of the program with a Markov chain (there is no non-deterministic choice).
+
+The simple symmetric random walk (\isa{\c{srw}}) is a Markov chain on $\mathbb{Z}$, in each step $i$ it goes uniformly to $i + 1$ or $i - 1$ (i.e. in both cases with probability $1/2$).
+Surprisingly, but well known (and formalised by Hurd~\cite{hurd2002thesis}), it reaches each point with probability $1$.
+Equally surprising, the expected time for the srw to go from $i$ to $i + 1$ is infinite!
+Kaminski~\etal~\cite{kaminski2016ert} prove this by providing a lower $\omega$-invariant.
+Unfortunately, this proof has a flaw: in Appendix~B.1 of \cite{kaminski2016ert-ext} (the extended version of \cite{kaminski2016ert}), the equation $1 + \llbracket x > 0 \rrbracket \cdot 2 + \llbracket 1 < x \le n + 1 \rrbracket \cdot \infty + \llbracket 0 < x \le n - 1 \rrbracket \cdot \infty
+= 1 + \llbracket x > 0 \rrbracket \cdot 2 + \llbracket 0 < x \le n + 1 \rrbracket \cdot \infty$
+does not hold for $n=0$ and $x=1$. 
+The author knows from private communication with Kaminski~\etal~that it still is possible to use a lower $\omega$-invariant.
+Unfortunately, the necessary invariant gets much more complicated.
+
+After discovering the flaw in the proof, we tried a more traditional proof.
+The usual approach in random walk theory uses the generating function of the first hitting time.
+Unfortunately, this would require quite some formalizations in combinatorics, e.g.~Stirling numbers and more theorems about generating functions than available in \cite{hoelzl2016mdp}. 
+Finally, we choose an approach similar to \cite{hurd2002thesis}, i.e.~we set up a linear equation system and prove that the only solution is infinity.
+
+Now, \isa{\c{srw} \hastype \t{int} \t{=>} \t{pmf}{\t{int}}} is the transition function for the simple symmetric random walk.
+The expected time to reach $j$ when started in $i$ is written \isa{H~i~j \stackrel{\c{def}}{=} \mathbb{E}^{\c{srw}}_{i}[f~j]}, where \isa{f~j~(k\cdot\omega) \stackrel{\c{lfp}}{=}~ \c{if} j = k \c{then} 0 \c{else} 1 + f~j~\omega} is the first hitting time.
+Now we need to prove the following rules: (I) \isa{H~j~i = H~j~k + H~k~i} if \isa{i \le j \le k},
+(II) \isa{H~(i+t)~(j+t) = H~i~j}, (III) \isa{H~i~j = H~j~i} and (VI) \isa{H~i~j = (\c{if} i = j \c{then} 0 \c{else} 1 + (H~i~(j+1) + H~i~(j-1)) / 2)}. From these rules we can derive $H~i~j = \infty$ for $i \not= j$.
+
+Rule (VI) is derived the expectation transformer semantics.
+But it is not clear to us how to prove rule (I) by only applying fixed point transformations or induction.
+Instead we prove (I) in a measure theoretic way:
+
+\begin{align}
+H~j~k + H~k~i 
+  & = \mathbb{E}^{\isa{\c{srw}}}_j[f~j + H~k~i] \nonumber\\
+  & = \sum_n (n + H~k~i)\cdot \Pr_j(f~k = n) \label{eq:fin}\\
+  & = \isa{\sum_n \mathbb{E}^{\c{srw}}_j[\lambda \omega.~(n + f~i~(\c{sdrop}~n~\omega)) \cdot 
+     \llbracket f~k~\omega = n\rrbracket]} \nonumber \\
+  & = \isa{\sum_n \mathbb{E}^{\c{srw}}_j[f~i]} = H~j~i \label{eq:f}
+\end{align}
+%
+\autoref{eq:fin} requires that $f~k$ is finite with probability $1$, we do a case distinction: if it is not finite a.e.~the result follows from $H~j~i \ge H~j~k = \infty$.
+\autoref{eq:f} is now simply proved by induction on $n$.
+The proofs for Equations~\ref{eq:fin} and~\ref{eq:f} essentially operate on each trace~$\omega$ in our probability space, making them inherently dependent on the trace space.
+
+\begin{theorem}[The running time of \isa{\c{srw}} is infinite.]
+$ H~i~j = \infty ~~\textrm{if}~~ i \not= j. $
+\end{theorem}
+
+\section{Coupon Collector}
+
+Another example we formalised is the coupon collector example from \cite{kaminski2016ert}.
+The idea is to compute the expected time until we collect $N$ different coupons from a uniform, independent and infinite source of coupons.
+The left side of \autoref{fig:cc} shows our concrete implementation $\mathtt{CC}_N$, the right side is its refinement (there is no array $cp$ necessary).
+By fixed point transformations we show that the (refined) inner loop's running time has a Geometric distribution, and hence the expected running time for $\mathtt{CC}_N$ is:
+$ \isa{\c{ert}~\mathtt{CC}_N~0~s = 2 + 4N + 2N\sum_{i = 1}^{N} \frac{1}{i} } $ for $N>0$.
+
+\begin{figure}
+
+\[
+\begin{array}{lr@{}c@{}ll}
+x := 0, cp := [\overbrace{F, \ldots, F}^{N~\textrm{times}}], i := 0
+& & & &
+c := 0, b := F
+\\
+\mathtt{WHILE}~x < N~\mathtt{DO}
+& x&{\rightarrow}&c &
+\mathtt{WHILE}~c < N~\mathtt{DO}
+\\
+\quad \mathtt{WHILE}~cp[i]~\mathtt{DO}~ i :\sim \mathrm{Unif}\{0, \ldots, N\}
+& \quad cp[i]&{\rightarrow}&b \quad &
+\quad \mathtt{WHILE}~b~\mathtt{DO}~ b :\sim \mathrm{Bern}(x/N)
+\\
+\quad cp[i] := T, x := x + 1
+& & |cp| = x & &
+\quad b := T, c := c + 1
+\\
+\end{array}
+\]
+
+\caption{The Coupon Collector in pGCL and its refinement}\label{fig:cc}
+\end{figure}
+
+\section{Related Work}
+
+The first formalisation of probabilistic programs was by Hurd~\cite{hurd2002thesis} in \texttt{hol98}, formalising a trace space for a stream of probabilistic bits.
+Hurd~\etal~\cite{hurd2005pgcl} is different approach, formalising the weakest pre-expectation transformer semantics of pGCL in HOL4.
+Both formalisations are not related.
+Audebaud and Paulin-Mohring~\cite{audebaud2009randomizedalgos} use a shallow embedding of a probability monad in Coq.
+
+\pagebreak
+\noindent 
+Cock~\cite{cock2012pgcl} provides a VCG for pGCL in Isabelle/HOL.
+Hölzl and Nipkow~\cite{hoelzl2012casestudies, hoelzl2013thesis} formalises MCs and analyses the expected running time of the ZeroConf protocol.
+On the basis of \cite{hoelzl2013thesis} formalises MDPs and shows the equivalence of the weakest pre-expectation transformer (based on the pen-and-paper proof in \cite{gretz2014pgclsem}).
+
+Unlike \autoref{thm:erteq}, these formalisations either define denotational semantics~\cite{hurd2005pgcl, audebaud2009randomizedalgos, cock2012pgcl}, or operational semantics~\cite{hurd2002thesis, hoelzl2012casestudies, hoelzl2013thesis}, none of them relate both semantics.
+
+\section{Conclusion and Future Work}
+
+While formalising the random walk example in \cite{kaminski2016ert} we found an essential flaw in the proof in\cite{kaminski2016ert-ext}.
+Our solution seams to indicate, that for the verification of expected running times an $\omega$-invariant approach is not enough.
+While the expectation transformer gives us a nice verification condition generator (e.g.~\cite{cock2012pgcl}), the trace space might be required to get additional information i.e.~fairness and termination.
+The equivalence between the expectation transformer semantics and the MDP semantics provides the required bridge between both worlds.
+Also we might require a probabilistic, relational Hoare logic (maybe based on \cite{lochbihler2016proboracles}) to automate tasks like \autoref{fig:cc}.
+
+\bibliographystyle{lncs}
+
+\bibliography{itp2016}
+
+\end{document}

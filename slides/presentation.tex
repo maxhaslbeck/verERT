@@ -1,0 +1,542 @@
+\documentclass[xetex,10pt,dvipsnames,svgnames]{beamer}
+
+%% standard packages
+\usepackage{mathpartir}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+
+\usetheme{metropolis}
+
+%% font/input settings
+\usepackage[english]{babel}
+\usepackage{fontawesome}
+
+\usepackage{tikz}
+\usetikzlibrary{matrix,
+  positioning,
+  backgrounds,
+  shapes,
+  shapes.callouts,
+  automata,
+  fit,
+  decorations.pathreplacing,
+  patterns
+}
+
+\tikzstyle{every picture}+=[remember picture]
+
+%% Andreas' isa constant package
+\include{isamarkup}
+\include{isadecl}
+
+\newcommand{\st}{\textcolor{DarkRed}{\tv{s}}}
+
+\newcommand{\lfp}{\mathrm{lfp}}
+\newcommand{\funF}{\textcolor{DarkRed}{f}}
+\newcommand{\funG}{\textcolor{DarkRed}{g}}
+\newcommand{\funalpha}{\textcolor{DarkRed}{\alpha}}
+\newcommand{\state}[1]{\textcolor{Chocolate}{#1}}
+\newcommand{\stateS}{\state{s}}
+\newcommand{\stateT}{\state{t}}
+\newcommand{\stateW}{\state{\omega}}
+\newcommand{\Nat}{\mathbb{N}}
+
+\DeclareIsaConst{coststream}{\isaconst{cost}_{\isaconst{stream}}}
+\DeclareIsaConst{cost}{\isaconst{cost}}
+\DeclareIsaConst{K}{\isaconst{K}}
+\newcommand{\ert}{\textcolor{purple}{\c{ert}}}
+\newcommand{\K}{\textcolor{purple}{\c{K}}}
+\newcommand{\cost}{\textcolor{purple}{\c{cost}}}
+\newcommand{\coststream}{\textcolor{purple}{\c{coststream}}}
+\newcommand{\var}[1]{\textcolor{Chocolate}{#1}}
+\newcommand{\expect}{\Big(\st \t{=>} \t{ennreal}\Big)}
+\newcommand{\I}[1]{\textcolor{blue}{\isa{#1}}}
+
+\newcommand{\Empty}{\bot}
+\newcommand{\Skip}{\text{\faEur}}
+\newcommand{\Halt}{\text{\faBolt}}
+
+%% PDF settings
+\hypersetup{%
+  pdftitle={Formalising Semantics for Expected Running Time of Probabilistic Programs (Rough Diamond)},
+  pdfauthor={Johannes H\"olzl}%
+}
+
+%% TITLE
+\title{Formalising Semantics for Expected Running Time of Probabilistic Programs ~~~ \small{(Rough Diamond)}}
+\author{Johannes H\"olzl}
+\institute{TU M\"unchen, Germany}
+\date{~}
+\titlegraphic{\hfill \includegraphics[scale=0.3]{isabelle.pdf}}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{This Talk}
+  \begin{itemize}
+  \item Probabilistic programs (pGCL) + expected running time.\\\pause
+     \textbf{Kaminski, Katoen, Matheja, and Olmedo [ESOP 2016]\pause~\textcolor{Gold}{\faStar}}\pause
+  \item Two semantics:\pause
+  \begin{description}
+    \item[Denotational:] \I{\t{pgcl}{\st} \t{=>} \expect \t{=>} \expect} \pause
+    \item[Operational:] \I{\big(\t{pgcl}{\st} \times \st\big) \t{=>}
+        \t{measure}{\t{stream}{\big(\t{pgcl}{\st} \times \st\big)}}} \pause
+    \item[Correspondence:] Denotational $\Leftrightarrow$ Operational \pause
+  \end{description}
+  \item Examples:\pause
+  \begin{itemize}
+    \item Simple Random Walk~\textcolor{Crimson}{\faBolt} \pause
+    \item Coupon Collector
+  \end{itemize}
+  \end{itemize}
+
+\begin{center}
+  clarified semantics \pause -- different proofs \pause -- fixed proofs
+\end{center}
+\end{frame}
+
+\begin{frame}{Probabilistic Guarded Command Language (pGCL)}
+
+\[ \I{ \begin{array}{lcl@{\qquad}l}
+\t{pgcl}{\st}
+& = & \Empty \pause~~|~~ \Skip\pause ~~|~~ \Halt \\
+\pause 
+& | & \var{x} :\sim \mathcal{D} ~~~\text{or}~~~ \var{x} := \mathsf{expr} & "\c{Assign}~(\st\t{=>}\t{pmf}{\st})" \\
+\pause 
+& | & \var{p_1}~;\,\var{p_2} \\
+\pause 
+& | & \var{p_1}~|\,\var{p_2} \\
+\pause 
+& | & \mathsf{ITE}~\var{g}~\var{p_1}~\var{p_2} &
+  \var{g} \hastype  \st \t{=>} \t{bool} \\
+\pause 
+& | & \mathsf{WHILE}~\var{g}~\mathsf{DO}~\var{p}
+\end{array} } \]
+
+\end{frame}
+
+\begin{frame}{Denotational Semantics (Expected Running Time)}
+\begin{center}
+\I{ \begin{array}{lccl}
+\multicolumn{4}{l}{%
+\ert \hastype \t{pgcl}{\st} \t{=>}
+  (\st \t{=>}{\tikz[overlay] \node[yshift=-0.2ex, xshift=-1.5ex] (post) {};} \t{ennreal}) \t{=>}
+  (\st \t{=>}{\tikz[overlay] \node[yshift=1ex, xshift=-1.5ex] (pre) {};} \t{ennreal})} \\[1ex]
+\pause
+\onslide<2,3>{%
+  \begin{tikzpicture}[overlay, shift=(current page.center), yshift=1.5cm, xshift=-2cm]
+    \node[fill=cyan!29, rectangle callout, rounded corners, callout absolute pointer=(post)] at (0, 0)
+         { Values we want assigned to a \emph{terminal state} } ;
+  \end{tikzpicture}%
+}%
+\pause 
+\onslide<3>{%
+  \begin{tikzpicture}[overlay, shift=(current page.center), yshift=3.5cm]
+    \node[fill=cyan!29, rectangle callout, rounded corners, callout absolute pointer=(pre)] at (0, 0)
+         { Values computed for the a \emph{starting state} } ;
+  \end{tikzpicture}%
+}%
+\pause
+\ert~\Empty & \var{c}
+& = & \var{c} \\[1ex] \pause
+\ert~\Skip & \var{c}
+& = & 1 + \var{c} \\[1ex] \pause
+\ert~\Halt & \var{c}
+& = &  0 \\ \pause
+\ert~(\c{Assign}~\var{u}) & \var{c}
+& = & 1 + \displaystyle \left(\lambda \var{x}.\, \int_{\var{y}} \var{c}~\var{y} ~d(\var{u}\,\var{x})\right) \\[1ex]
+\pause
+\ert~(\var{p_1};~\var{p_2}) & \var{c}
+& = & \ert~\var{p_1}~(\ert~\var{p_2}~\var{c}) \\[1ex] \pause
+\ert~(\var{p_1}~|~\var{p_2}) & \var{c}
+& = & \ert~\var{p_1}~\var{c} \sqcup \ert~\var{p_2}~\var{c} \\[1ex] \pause
+\ert~(\mathsf{ITE}~\var{g}~\var{p_1}~\var{p_2}) & \var{c}
+& = & 1 + \big(\lambda \var{x}.\, \c{if} \var{g}~\var{x}
+  \c{then} \ert~\var{p_1}~\var{c}~\var{x} \c{else} \ert~\var{p_2}~\var{c}~\var{x}\big) \\[1ex] \pause
+\ert~(\mathsf{WHILE}~\var{g}~\mathsf{DO}~\var{p}) & \var{c}
+& = & \c{lfp}~\big(\lambda \var{W}\,\var{x}.\, 1~+ \c{if} \var{g}~\var{x}
+  \c{then} \ert~\var{p}~\var{W}\,\var{x} \c{else} \var{c}~\var{x}\big)
+\end{array} }
+\end{center}
+\end{frame}
+
+\begin{frame}{Interjection: Markov decision processes}
+  \begin{center}\bf Automata with probabilistic and non-deterministic choice\end{center}
+  \[ \I{K \hastype \st \t{=>} \t{set}{\t{pmf}{\st}} \quad \quad K\,\stateS \not= \emptyset } \] 
+\begin{tikzpicture}[line width=1pt, shorten >=2pt]
+  \path [use as bounding box] (-4, -2) rectangle (4, 2) ;
+  \alert<8>{\node [draw, circle] (trg) at (3, 0) { $\state{t_1}$ } ;}
+\only<2->{ \alert<8>{
+  \node [draw, circle] (trg2) at (3, 1) { $\state{t_2}$ } ;
+  \node [draw, circle] (trg3) at (3, -1) { $\state{t_3}$ } ;
+} }
+
+\only<1-2>{
+  \node [draw, circle] (src) at (-3, 0) { $\stateS$ } ;
+  \path [->] (src) edge [below] node {\only<2->{$p$}} (trg) ;
+  \only<2>{
+    \path [->] (src) edge [below] node {\only<2->{$q$}} (trg2) ;
+    \path [->] (src) edge [below] node {\only<2->{$r$}} (trg3) ;
+  }
+}
+
+\only<3->{
+  \alert<5>{\node [draw, circle] (src) at (-3, 0) { $\stateS$ } ;}
+  \alert<6>{\node [fill, circle, inner sep=2.5pt] (dst) at (0, 0) { } ;
+  \node [fill, circle, inner sep=2.5pt] (dst2) at (0, 1) { } ;}
+
+  \path [->] (src) edge [below] (dst) ;
+  \path [->] (src) edge [above] (dst2) ;
+\alert<7>{
+  \path [->] (dst) edge [above right] node {$p$} (trg) ;
+  \path [->] (dst) edge [above] node {$q$} (trg2) ;
+  \path [->] (dst) edge [below] node {$r$} (trg3) ; }
+
+  \draw[gray!50] (dst2) -- (1.5, 1.25) ;
+  \draw[gray!50] (dst2) -- (1.5, 1.75) ;
+  \draw[gray!50] (dst2) -- (1, 1.75) ;
+}
+\end{tikzpicture}
+
+\onslide<4->{
+\begin{center}
+  Construct maximal expectation $\I{\hat{\mathbb{E}}_{\stateS}[\funF]}$ of a (cost) function $\funF$:
+  \[ \I{
+      \alert<5>{\hat{\mathbb{E}}_{\stateS}[\funF]} =
+      \alert<6>{\bigsqcup_{D \in K~\stateS}}
+      \alert<7>{\int_{\state{t}}}
+      \alert<8>{~~\hat{\mathbb{E}}_{\state{t}}[\lambda \stateW.~\funF~(\state{t}\cdot\stateW)] ~~}
+      \alert<7>{\mathsf{d}D}
+    } \]
+\end{center}}
+\end{frame}
+
+\begin{frame}{Operational Semantics}
+\I{ \begin{array}{l@{~}c@{~}c@{~}l}
+\multicolumn{4}{l}{%
+\K \hastype (\t{pgcl}{\st} \t{*} \st) \t{=>} \t{set}{\t{pmf}{(\t{pgcl}{\st} \t{*} \st)}}} \\[1ex]
+\onslide<2->{
+\K (\Empty,&\stateS) & = &
+\c{det}{\Empty}{\stateS} \\[1ex]
+\K (\Skip,&\stateS) & = &
+\c{det}{\Empty}{\stateS} \\[1ex]
+\K (\Halt,&\stateS) & = &
+\c{det}{\Halt}{\stateS} \\[1ex]
+}
+\onslide<3->{
+\K (\c{Assign}~\var{u},&\stateS) & = &
+\Big[\lambda \state{s'}.~(\Empty, \state{s'})\Big]~\big\{\var{u}~\stateS\big\} \\[1ex]
+}
+\onslide<4->{
+\K (\var{p_1}~|~\var{p_2},&\stateS) & = & 
+\c{det}{\var{p_1}}{\stateS} \cup \c{det}{\var{p_2}}{\stateS} \\[1ex]
+}
+\onslide<5->{
+\K (\mathsf{ITE}~\var{g}~\var{p_1}~\var{p_2},&\stateS) & = &
+\c{if} \var{g}\, \stateS \c{then}~ \c{det}{\var{p_1}}{s} ~\c{else}~ \c{det}{\var{p_2}}{\stateS} \\[1ex]
+\K (\mathsf{WHILE}~\var{g}~\mathsf{DO}~\var{p},&\stateS) & = &
+\c{if} \var{g}\,\stateS \c{then}~ \c{det}{\var{p};~\mathsf{WHILE}~\var{g}~\mathsf{DO}~\var{p}}{\stateS} ~\c{else}~ \c{det}{\Empty}{\stateS} \\[1ex]
+}
+\onslide<6->{
+\K (\var{p_1};~\var{p_2},&\stateS) & = & \left[\lambda%
+\begin{array}{ll}
+(\Empty, \state{s'}). & (\var{p_2}, \state{s'}) \\
+(\Halt, \state{s'}). & (\Halt, \state{s'}) \\
+(\var{p'}, \state{s'}). & (\var{p'};~\var{p_2}, \state{s'})
+\end{array} %
+\right]~\K(\var{p_1}, \stateS)\
+}
+\end{array} }
+
+\begin{tikzpicture}[overlay, shift=(current page.center), xshift=-5cm, yshift=2.5cm]
+\onslide<7>{
+  \fill[cyan!20, rounded corners] (-1, 0.4) rectangle (11,-3.4) ;
+ 
+  \node[draw, rounded corners] (P1) at (8, 0) {\I{(\var{x} := 1 | \Halt, \stateS)}} ;
+  \node[draw, rounded corners] (P2) at (7, -1) {\I{(\var{x} := 1, \stateS)}} ;
+  \node[draw, rounded corners] (P3) at (10, -1) {\I{(\Halt, \stateS)}} ;
+  \node[draw, rounded corners] (P4) at (7, -2) {\I{(\Empty, \state{s'})}} ;
+
+  \path[->, >=latex]
+    (P1)  edge [bend right=15] (P2)
+          edge [bend left=15]  (P3)
+    (P3)  edge [in=-90, out=-110, loop] (P3)
+    (P2)  edge (P4)
+    (P4)  edge [in=-90, out=-110, loop] (P4) ;
+
+  \node (arr) at (5.5, -1) {\I{\stackrel{\Longleftarrow}{\c{DUMMY};\alert{p_2}}}};
+
+  \node[draw, rounded corners] (S1) at (2, 0) {\I{((\var{x} := 1 | \Halt);\alert{p_2}, \stateS)}} ;
+  \node[draw, rounded corners] (S2) at (1, -1) {\I{(\var{x} := 1;\alert{p_2}, \stateS)}} ;
+  \node[draw, rounded corners] (S3) at (4, -1) {\I{(\Halt, \stateS)}} ;
+  \node[draw, rounded corners] (S4) at (1, -2) {\I{(\alert{p_2}, \state{s'})}} ;
+
+  \path[->, >=latex]
+    (S1)  edge [bend right=15] (S2)
+          edge [bend left=15]  (S3)
+    (S3)  edge [in=-90, out=-110, loop] (S3)
+    (S2)  edge (S4);
+}
+\end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}{Traces}
+\begin{center}
+\begin{tikzpicture}
+ 
+  \node at (0, 6) { Trace } ;
+  \node at (5, 6) { \I{\coststream} } ;
+
+  \node[draw, rounded corners] (P1) at (0, 5) {\I{((\var{x} := 1 | \Halt); \var{y} := 0, \stateS)}} ;
+  \node (C1) at (5, 5) {\I{0}} ;
+
+\pause
+
+  \node[draw, rounded corners] (P2) at (0, 4) {\I{(\var{x} := 1; \var{y} := 0, \stateS)}} ;
+  \path[->, >=latex, double]
+    (P1) edge[double] (P2) ;
+
+  \node (p1) at (5, 4.5) {\I{+}} ;
+  \node (C2) at (5, 4) {\I{1}} ;
+
+\pause
+
+  \node[draw, rounded corners] (P3) at (0, 3) {\I{(\var{y} := 0, \state{s'})}} ;
+  \path[->, >=latex, double]
+    (P2) edge[double] (P3) ;
+
+  \node (p2) at (5, 3.5) {\I{+}} ;
+  \node (C3) at (5, 3) {\I{1}} ;
+
+\pause
+
+  \node[draw, rounded corners] (P4) at (0, 2) {\I{(\Empty, \state{s''})}} ;
+  \path[->, >=latex, double]
+    (P3) edge[double] (P4) ;
+  \node (p3) at (5, 2.5) {\I{+}} ;
+  \node (C4) at (5, 2) {\I{\funF~\state{s''}}} ;
+
+  \node (Pi) at (0, 1.5) {$\vdots$} ;
+
+\end{tikzpicture}
+\end{center}
+
+Cost per stream:
+\[ \I{
+    \coststream~\funF~(\stateS{\cdot}\var{\omega}) \stackrel{\c{lfp}}{=}
+    \cost~\funF~\stateS~(\coststream~\funF~\var{\omega})
+  } \]
+\end{frame}
+
+\begin{frame}{Interjection: Least Fixed Points}
+  \begin{theorem}[Transfer rule for least fixed points]
+    \[
+      \inferrule%
+      { \I{\c{supcontinuous}~\funalpha, \funF, \funG} \\
+        \I{\funalpha~\bot = \bot} \and \I{\funalpha \circ \funF = \funG \circ \funalpha}}%
+      {\I{\funalpha{\tikz[overlay] \node[yshift=-0.2ex, xshift=-1ex] (alpha) {};}
+          (\c{lfp}~\funF) ={\tikz[overlay] \node[yshift=-0.2ex, xshift=-1ex] (eq3) {};} \c{lfp}~\funG }}
+    \]
+  \end{theorem}
+\onslide<2>{%
+  \begin{tikzpicture}[remember picture, overlay, shift=(current page.center), yshift=-3cm]
+    \node[fill=cyan!20, rectangle callout, rounded corners, callout absolute pointer=(eq3)] at (0, 0)
+         { \I{\begin{array}{lcl}
+             \funalpha (\c{lfp}~\funF) & = &
+             \funalpha \circ \funF \circ \funF \circ \funF \circ \funF \circ  \funF \circ \dots \circ \bot \\
+             & = & \funG \circ \funG \circ \funG \circ \funalpha \circ \funF \circ  \funF \circ \dots \circ \bot \\
+             & = & \funG \circ \funG \circ \funG \circ \funG \circ \funG \circ \dots \circ \funalpha~\bot \\
+             & = & \c{lfp}~\funG
+           \end{array}}
+         } ;
+  \end{tikzpicture} }
+\onslide<3>{%
+  \begin{tikzpicture}[remember picture, overlay, shift=(current page.center), yshift=-3cm]
+    \node[fill=cyan!20, rectangle callout, rounded corners, callout absolute pointer=(alpha)] at (0, 0)
+         { \I{\displaystyle \funalpha~\funF = \hat{\mathbb{E}}_{\stateS}[\funF]}
+           \qquad for $\funF$ Borel-measurable } ;
+  \end{tikzpicture} }
+\onslide<4>{
+  \[ \I{\hat{\mathbb{E}}_{(\var{p}, \stateS)}[\coststream~\funF] =
+      \c{lfp}~\left(\bigsqcup_{K~s}~~\int~~\c{cost}\right)}~\var{p}~\stateS \]
+}
+  
+\end{frame}
+
+\begin{frame}{Correspondence Proof}
+  \begin{theorem}
+    \[ \I{\hat{\mathbb{E}}_{(\var{p}, \stateS)}[\coststream~\funF] = \ert~\var{p}~\funF~\stateS } \]
+  \end{theorem}
+\pause
+  \begin{proof}[Proof by induction on $\var{p}$:]
+\pause
+  \begin{description}[\I{\mathsf{WHILE}~\var{g}~\mathsf{DO}~\var{p_1}}]
+  \item[\I{\var{p_1}; \var{p_2}}] -- Antisymmetry then fixed point induction \\
+    \I{\hat{\mathbb{E}}_{(\var{p_1}, \stateS)}[\coststream~(
+      \hat{\mathbb{E}}_{(\var{p_2}, {\cdot})}[\coststream~\funF])] =
+      \hat{\mathbb{E}}_{(\var{p_1};\var{p_2}, \stateS)}[\coststream~\funF]}
+\pause
+  \item[\I{\mathsf{WHILE}~\var{g}~\mathsf{DO}~\var{p_1}}] -- Fixed point massaging
+\pause
+  \end{description}
+  \end{proof}
+
+  \begin{itemize}
+  \item Operational semantics \& Correspondence $\sim 330$ lines of theory
+\pause
+  \item Central to our proof: Expectation as fixed point
+\pause
+  \item \textbf{[KKMO 2016]}: Expectation as sums over all paths
+  \end{itemize}
+  
+\end{frame}
+
+\begin{frame}{Simple Symmetric Random Walk (ssrw)}
+
+\begin{tikzpicture}[state/.style={circle, draw, minimum size=0.75cm, inner sep=0cm}]
+  \node[state] (z)  at ( 0, 0) {\small $0$} ;
+  \node[state] (p1) at ( 1, 0) {\small $1$} ;
+  \node[state] (m1) at (-1, 0) {\small $-1$} ;
+  \node[state] (p2) at ( 2, 0) {\small $2$} ;
+  \node[state] (m2) at (-2, 0) {\small $-2$} ;
+  \node[state] (p3) at ( 3, 0) {\small $3$} ;
+  \node[state] (m3) at (-3, 0) {\small $-3$} ;
+  \node (pi) at ( 4.5, 0) {$\cdots$} ;
+  \node (mi) at (-4.5, 0) {$\cdots$} ;
+
+  \path[->]
+    (z)  edge[bend left=30] node[above] {\tiny $1/2$} (p1) 
+    (p1) edge[bend left=30] node[below] {\tiny $1/2$} (z)
+    (p1) edge[bend left=30] node[above] {\tiny $1/2$} (p2)
+    (p2) edge[bend left=30] node[below] {\tiny $1/2$} (p1)
+    (p2) edge[bend left=30] node[above] {\tiny $1/2$} (p3)
+    (p3) edge[bend left=30] node[below] {\tiny $1/2$} (p2)
+    (p3) edge[bend left=30] node[above] {\tiny $1/2$} (pi)
+    (pi) edge[bend left=30] node[below] {\tiny $1/2$} (p3) ;
+
+  \path[->]
+    (z)  edge[bend left=30] node[below] {\tiny $1/2$} (m1) 
+    (m1) edge[bend left=30] node[above] {\tiny $1/2$} (z)
+    (m1) edge[bend left=30] node[below] {\tiny $1/2$} (m2)
+    (m2) edge[bend left=30] node[above] {\tiny $1/2$} (m1)
+    (m2) edge[bend left=30] node[below] {\tiny $1/2$} (m3)
+    (m3) edge[bend left=30] node[above] {\tiny $1/2$} (m2)
+    (m3) edge[bend left=30] node[below] {\tiny $1/2$} (mi)
+    (mi) edge[bend left=30] node[above] {\tiny $1/2$} (m3) ;
+
+\end{tikzpicture}
+
+\begin{itemize}
+  \item \I{\Pr_{\var{i}}(\lozenge \var{j}) = 1}
+  \item \I{H~\var{i}~\var{j} := \ert~(\mathsf{ssrw}~\var{j})~\bot~\var{i}} \\
+    for \I{\var{i} \not= \var{j}}: \I{H~\var{i}~\var{j}= \pause \infty}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Simple Symmetric Random Walk -- [KKMO]}
+  \begin{center}
+    How do \textbf{Kaminski, Katoen, Matheja, and Olmedo} prove it?
+  \end{center}
+  \begin{itemize}
+  \item<2-> \I{\ert~(\mathsf{ssrw}~\var{j})~\bot~\var{i}} has lower $\omega$-invariant
+    \I{I_{\var{n} + 1} \le \ert~\mathsf{STEP}~I_{\var{n}} }:
+    \[ \I{I_{\var{n}} = 1 + \llbracket 0 < \var{x} \le \var{n} \rrbracket \cdot \infty} \]
+  \item<3-> They need to prove this equation: \\
+    \I{1 + \llbracket \var{x} > 0 \rrbracket \cdot 2 +
+      \llbracket 1 < \var{x} \le \var{n} + 1 \rrbracket \cdot \infty +
+      \llbracket 0 < \var{x} \le \var{n} - 1 \rrbracket \cdot \infty =} \\
+    \I{1 + \llbracket \var{x} > 0 \rrbracket \cdot 2 + \llbracket 0 < \var{x} \le
+      \var{n} + 1 \rrbracket \cdot \infty}
+  \onslide<4>{
+  \begin{tikzpicture}[overlay, shift=(current page.center), yshift=-2cm]
+    \node [draw=red, rotate = 45, scale = 3, text = red, rounded corners, line width = 4pt] at (0, 0) { ERROR };
+  \end{tikzpicture} }
+  \onslide<5>{
+  \begin{tikzpicture}[overlay, shift=(current page.center), yshift=-3.2cm]
+    \node[fill=red!29, rounded corners, inner sep=5mm] at (0, 0) {\parbox{7cm}{
+        Fails for \I{\var{x} = 1} and \I{\var{n} = 0}.
+    }};
+  \end{tikzpicture} }
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Simple Symmetric Random Walk -- our Solution}
+  Use \I{H~\var{i}~\var{j} = \hat{\mathbb{E}}_{(\mathsf{ssrw}~\var{j}, \var{i})}[\coststream{\tikz[overlay] \node[yshift=0.4ex, xshift=-4ex] (post) {};}]} to prove
+  \[ \I{H~\var{i}~\var{j} = H~\var{i}~\var{k} + H~\var{k}~\var{j}} \quad \text{for} \quad \I{\var{i} \le \var{k} \le \var{j}} \]
+
+  \begin{tikzpicture}[overlay, shift=(current page.center), yshift=2cm, xshift=-2cm]
+    \node[fill=cyan!29, rectangle callout, rounded corners, callout absolute pointer=(post)] at (0, 0)
+         { Operational semantics -- trace representation } ;
+  \end{tikzpicture}%
+
+\pause
+  Then derive \I{H~\var{i}~\var{j} = \infty} for \I{\var{i} \not= \var{j}}
+  \pause \textcolor{green}{\Large \checkmark}
+\end{frame}
+
+
+\begin{frame}{Coupon Collector}
+\[\I{
+\begin{array}{lcl}
+\var{x} := 0, \var{i} := 0, \var{cp} := [\overbrace{F, \ldots, F}^{\var{N}~\textrm{times}}]; &
+&
+\onslide<2->{\var{c} := 0, \var{b} := F;}
+\\
+\mathsf{WHILE}~\var{x} < \var{N}~\mathsf{DO} &
+\onslide<3->{\var{x} \rightarrow \var{c}} &
+\onslide<2->{\mathsf{WHILE}~\var{c} < \var{N}~\mathsf{DO}}
+\\
+\quad \mathsf{WHILE}~\var{cp}[\var{i}]~\mathsf{DO} &
+\quad \onslide<3->{\var{cp}[\var{i}] \rightarrow \var{b}} \quad &
+\onslide<2->{\quad \mathsf{WHILE}~\var{b}~\mathsf{DO}}
+\\
+\quad \quad \var{i} :\sim \mathcal{U}(\{1, \ldots, \var{N}\}); &
+\onslide<3->{|\var{cp}| = \var{x}} &
+\onslide<2->{\quad \quad \var{b} :\sim \mathcal{B}(\var{x}/\var{N});}
+\\
+\quad \var{cp}[\var{i}] := T, \var{x} := \var{x} + 1 &
+&
+\onslide<2->{\quad \var{b} := T, \var{c} := \var{c} + 1}
+\end{array}}
+\]
+
+\I{\ert~\mathtt{CC}_{\var{N}}~0~\stateS =
+  2 + \var{N}\cdot\left(4 + 2\sum_{\var{i} = 1}^{\var{N}} \frac{1}{\var{i}}\right)}.
+\begin{center}
+\onslide<4->{ \textbf{KKMO} use loop invariants to prove running time }
+\end{center}
+\end{frame}
+
+\begin{frame}{Related Work}
+  Different pGCL formalizations already exist:
+\pause
+  \begin{description}[Celiku \& McIver~{[N. J. C. 2004]}]
+  \item[Hurd~\emph{et~al.}~{[QAPL 2003]}] VCG in HOL, deep
+\pause
+  \item[Celiku \& McIver~{[N. J. C. 2004]}] Expected running time 
+    \begin{itemize}
+    \item Allow cost analysis for pGCL
+    \item Refinement only for upper bounds
+    \item No relation to an operational model
+    \end{itemize}
+\pause
+  \item[Cock {[SSV 2012]}] VCG in Isabelle/HOL, shallow
+  \end{description}
+\end{frame}
+
+\begin{frame}{Conclusion \& Future Work}
+  \begin{itemize}
+  \item Relating denotational and operational semantics
+\pause
+  \item Explore use cases where this relation simplifies proofs\\
+\pause
+    \textbf{Loop invariants are not always enough}
+\pause
+  \item Explore: Probabilistic relational Hoare logic (pRHL) + non-determinism
+  \end{itemize}
+\end{frame}
+
+\end{document}

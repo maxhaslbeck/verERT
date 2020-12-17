@@ -1,0 +1,4 @@
+@default_files  = ("presentation.tex");
+
+$pdflatex = "~/Prog/pplatex/src/pplatex -c xelatex -b -- %O %S";
+

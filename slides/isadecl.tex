@@ -1,0 +1,370 @@
+% Isabelle library types
+% ======================
+\DeclareIsaType{_}{\_}
+\DeclareIsaType{unit}{\isatype{unit}}
+\DeclareIsaType{nat}{\isatype{nat}}
+\DeclareIsaType{bool}{\isatype{bool}}
+\DeclareIsaType{int}{\isatype{int}}
+\DeclareIsaType{rat}{\isatype{rat}}
+\DeclareIsaType{real}{\isatype{real}}
+\DeclareIsaType{fun}[2]{#1 \mathbin{\Rightarrow} #2}
+\DeclareIsaType{=>}{\mathbin{\Rightarrow}}
+\DeclareIsaType{prod}[2]{#1 \mathbin{\times} #2}
+\DeclareIsaType{*}{\mathbin{\times}}
+\DeclareIsaType{sum}[2]{#1 \mathbin{+} #2}
+\DeclareIsaType{+}{\mathbin{+}}
+\DeclareIsaType{option}[1]{#1\ \isatype{option}}
+\DeclareIsaType{list}[1]{#1\ \isatype{list}}
+\DeclareIsaType{array}[1]{#1\ \isatype{array}}
+\DeclareIsaType{filter}[1]{#1\ \isatype{filter}}
+\DeclareIsaType{set}[1]{#1\ \isatype{set}}
+\DeclareIsaType{ennreal}{\overline{\mathbb{R}}_{\ge 0}}
+
+\DeclareIsaType{completelattice}{\isatype{complete}\isaunderscore \isatype{lattice}}
+\DeclareIsaType{completelinorder}{\isatype{complete}\isaunderscore \isatype{linorder}}
+\DeclareIsaType{topologicalspace}{\isatype{topological}\isaunderscore \isatype{space}}
+
+% Isabelle library constant
+% =========================
+\DeclareIsaConst{[|}{\llbracket}
+\DeclareIsaConst{|]}{\rrbracket}
+\DeclareIsaConst{==>}{\Longrightarrow}
+
+\DeclareIsaConst{==}{\equiv}
+
+\DeclareIsaConst{op}[1]{\isaconst{op}\ \mathord{#1}}
+
+\DeclareIsaConst{->}{\to}
+\DeclareIsaConst{_}{\_}
+\DeclareIsaConst{_case_case}{\isaconst{case}}
+\DeclareIsaConst{_case_of}{\isaconst{of}}
+\DeclareIsaConst{_case_=>}{\mathrel{\Rightarrow}}
+\DeclareIsaConst{_case_|}{\mathrel{|}}
+\DeclareIsaConst{_let_let}{\isaconst{let}}
+\DeclareIsaConst{_let_in}{\isaconst{in}}
+\DeclareIsaConst{id}{\isaconst{id}}
+\DeclareIsaConst{-->}{\longrightarrow}
+\DeclareIsaConst{and}{\mathrel{\wedge}}
+\DeclareIsaConst{or}{\mathrel{\vee}}
+\DeclareIsaConst{<-->}{\longleftrightarrow}
+\DeclareIsaConst{undefined}{\isaconst{undefined}}
+\DeclareIsaConst{if}{\mathrel{\isaconst{if}}}
+\DeclareIsaConst{then}{\mathrel{\isaconst{then}}}
+\DeclareIsaConst{else}{\mathrel{\isaconst{else}}}
+\DeclareIsaConst{()}{\mathord{(}\mathord{)}}
+\DeclareIsaConst{in}{\mathrel{\isaconst{in}}}
+% \DeclareIsaConst{funpow}{\mathrel{\textrm{\textasciicircum\textasciicircum}}}
+\DeclareIsaConst{DUMMY}{\mathrel{\isaunderscore}}
+
+\DeclareIsaConst{True}{\isaconst{True}}
+\DeclareIsaConst{False}{\isaconst{False}}
+\DeclareIsaConst{Not}{\isaconst{Not}}
+
+\DeclareIsaConst{fst}{\isaconst{fst}}
+\DeclareIsaConst{snd}{\isaconst{snd}}
+\DeclareIsaConst{Inl}{\isaconst{Inl}}
+\DeclareIsaConst{Inr}{\isaconst{Inr}}
+
+
+\DeclareIsaConst{THE}[2]{\iota#1.\,#2}
+\DeclareIsaConst{_THE}{\iota}
+\DeclareIsaConst{_Eps}{\varepsilon}
+\DeclareIsaConst{SOME}[2]{\c{_Eps}#1.\ #2}
+\DeclareIsaConst{LEAST}[2]{\isaconst{LEAST}\ #1.\ #2}
+\DeclareIsaConst{_LEAST}{\isaconst{LEAST}}
+
+\DeclareIsaConst{uminus}{\mathord{-}}
+\DeclareIsaConst{Set.uminus}[1]{\mathord-\,#1}
+
+
+\DeclareIsaConst{None}{\isaconst{None}}
+\DeclareIsaConst{Some}[1][]{%
+  \def\testa{#1}\def\testb{}%
+  \ifx\testa\testb\isaconst{Some}\else\mathord\lfloor#1\mathord\rfloor\fi%
+}
+\DeclareIsaConst{SomeL}{\mathord\lfloor}
+\DeclareIsaConst{SomeR}{\mathord\rfloor}
+\DeclareIsaConst{the}{\isaconst{the}}
+\DeclareIsaConst{_option_case}[4]{\c{_case_case}\ #1\ \c{_case_of}\ \c{None} \c{_case_=>} #2\ |\ \c{Some}[#3] \c{_case_=>} #4}
+\DeclareIsaConst{Option.map}{\isaconst{Option.map}}
+
+
+\DeclareIsaConst{Set.empty}{\emptyset}
+\DeclareIsaConst{insert}{\isaconst{insert}}
+\DeclareIsaConst{UNIV}{\isaconst{UNIV}}
+\DeclareIsaConst{image}[2]{#1 \mathbin{`} #2}
+\DeclareIsaConst{finite}{\isaconst{finite}}
+\DeclareIsaConst{infinite}{\isaconst{infinite}}
+
+\DeclareIsaConst{singleton}[1]{\{\,#1\,\}}
+\DeclareIsaConst{Un}{\mathrel{\cup}}
+\DeclareIsaConst{Int}{\mathrel{\cap}}
+\DeclareIsaConst{Union}[1]{\bigcup #1}
+\DeclareIsaConst{UN}[2]{\bigcup_{#1} #2}
+\DeclareIsaConst{Inter}[1]{\bigcap #1}
+\DeclareIsaConst{INT}[2]{\bigcap_{#1} #2}
+\DeclareIsaConst{<+>}{\uplus}
+\DeclareIsaConst{Pow}[1]{\mathcal{P}(#1)}
+\DeclareIsaConst{range}{\isaconst{range}}
+\DeclareIsaConst{restrictrelation}[2]{\mathrel{\left.\mathord{#1}\right|_{#2}}}
+\DeclareIsaConst{inv_imageP}[2]{#2^{-1}(#1)}
+\DeclareIsaConst{:}{\in}
+\DeclareIsaConst{/:}{\notin}
+\DeclareIsaConst{card}[1]{||#1||}
+\DeclareIsaConst{bind}{\isaconst{bind}}
+\DeclareIsaConst{bind*}{\mathrel{>\!\!>\!\!=}}
+\DeclareIsaConst{return}{\isaconst{return}}
+\DeclareIsaConst{::}{::}
+
+\DeclareIsaConst{lfp}{\isaconst{lfp}}
+\DeclareIsaConst{gfp}{\isaconst{gfp}}
+
+\DeclareIsaConst{SUP}[2]{\bigsqcup_{#1} #2}
+\DeclareIsaConst{INF}[2]{\bigsqcap_{#1} #2}
+
+\DeclareIsaConst{inj_on}{\isaconst{inj\isaunderscore on}}
+
+\DeclareIsaConst{Min}{\isaconst{Min}}
+
+\DeclareIsaConst{div}{\mathbin{\isaconst{div}}}
+\DeclareIsaConst{int}{\isaconst{int}}
+\DeclareIsaConst{nat}{\isaconst{nat}}
+\DeclareIsaConst{>=}{\ge}
+\DeclareIsaConst{<}{<}
+\DeclareIsaConst{>}{>}
+\DeclareIsaConst{op >}{\isaconst{op}\ \mathord{>}}
+% \DeclareIsaConst{Suc}{\isaconst{Suc}}
+\DeclareIsaConst{max}{\isaconst{max}}
+
+\newcommand{\lub}{\mathord{\textstyle\bigvee}}
+
+
+\DeclareIsaType{enat}{\isatype{enat}}
+
+\DeclareIsaConst{enat_unfold}{\isaconst{enat\isaunderscore unfold}}
+% \DeclareIsaConst{eSuc}{\isaconst{eSuc}}
+\DeclareIsaConst{infinity}{\infty}
+\DeclareIsaConst{the_enat}{\isaconst{nat\isaunderscore of}}
+
+\DeclareIsaType{ereal}{\isatype{ereal}}
+
+\DeclareIsaType{measure}[1]{#1\ \isatype{measure}}
+\DeclareIsaConst{space}{\isaconst{space}}
+\DeclareIsaConst{sets}{\isaconst{sets}}
+\DeclareIsaConst{emeasure}{\isaconst{emeasure}}
+\DeclareIsaConst{measure}{\isaconst{measure}}
+\DeclareIsaConst{nnint}[2]{\int #1~\isaconst{d}#2}
+\DeclareIsaConst{nnint*}[3]{\int_#2 #2~\isaconst{d}#3}
+\DeclareIsaConst{integrable}{\isaconst{integrable}}
+\DeclareIsaConst{sfmeasure}{\isaconst{sigma\isaunderscore finite\isaunderscore measure}}
+
+\DeclareIsaConst{density}{\isaconst{density}}
+\DeclareIsaConst{distr}{\isaconst{distr}}
+\DeclareIsaConst{uniform}{\isaconst{cprob}}
+\DeclareIsaConst{count}{\isaconst{count\isaunderscore space}}
+\DeclareIsaConst{point}{\isaconst{point\isaunderscore measure}}
+
+\DeclareIsaConst{salgebra}{\isaconst{sigma\isaunderscore algebra}}
+\DeclareIsaConst{measurespace}{\isaconst{measure\isaunderscore space}}
+\DeclareIsaConst{Nat}{\mathbb{N}}
+\DeclareIsaConst{measurable}[2]{#1 \to^{\!\sigma} #2}
+% \DeclareIsaConst{Measurable.pred}[2]{\isaconst{Measurable.pred}\ #1\ #2}
+\DeclareIsaConst{bool}{\isaconst{bool}}
+\DeclareIsaConst{restrict}{\isaconst{restrict\isaunderscore space}}
+\DeclareIsaConst{vsigma}{\isaconst{vsigma}}
+\DeclareIsaConst{sigma}{\isaconst{sigma}}
+\DeclareIsaConst{Supsigma}{{\textstyle \bigsqcup^{\sigma}}}
+\DeclareIsaConst{SUPsigma}[2]{\mathop{{\bigsqcup}^{\sigma}\kern-1.3ex}_{#1} #2}
+\DeclareIsaConst{prodM}[2]{#1\ {\times^\sigma}\ #2}
+\DeclareIsaConst{ProdM}[2]{\mathop{{\prod}^{\sigma}\kern-1.3ex}_{#1}\ #2}
+\DeclareIsaConst{pred}{\isaconst{pred}}
+\DeclareIsaConst{indicator}{\isaconst{indicator}}
+\DeclareIsaConst{AE}[3]{A\!E~#1~\isaconst{in}~#2.~#3}
+\DeclareIsaConst{prob}[3]{\Pr\left(#1 ~\isaconst{in}~#2.~#3\right)}
+\DeclareIsaConst{cprob}[4]{\Pr\left(#1 ~\isaconst{in}~#2.~#3~|~#4\right)}
+
+\DeclareIsaConst{mono}{\isaconst{mono}}
+\DeclareIsaConst{antimono}{\isaconst{antimono}}
+\DeclareIsaConst{probspace}{\isaconst{prob\isaunderscore space}}
+\DeclareIsaConst{subprobalgebra}{\isaconst{subprob\isaunderscore algebra}}
+\DeclareIsaConst{subprob}{\isaconst{subprob}}
+\DeclareIsaConst{borel}{\isaconst{borel}}
+\DeclareIsaConst{lborel}{\isaconst{lborel}}
+\DeclareIsaConst{open}{\isaconst{open}}
+\DeclareIsaConst{continuouson}{\isaconst{continuous\isaunderscore on}}
+\DeclareIsaConst{supcontinuous}{\sqcup{-}\isaconst{continuous}}
+\DeclareIsaConst{infcontinuous}{\isaconst{inf\isaunderscore continuous}}
+\DeclareIsaConst{countable}{\isaconst{countable}}
+
+
+\DeclareIsaConst{streamspace}{\isaconst{stream\isaunderscore space}}
+
+\DeclareIsaType{pmf}[1]{#1\ \isaconst{pmf}}
+\DeclareIsaConst{measurepmf}{\isaconst{measure\isaunderscore pmf}}
+\DeclareIsaConst{bindpmf}{\isaconst{bind\isaunderscore pmf}}
+\DeclareIsaConst{returnpmf}{\isaconst{return\isaunderscore pmf}}
+\DeclareIsaConst{mappmf}{\isaconst{map\isaunderscore pmf}}
+\DeclareIsaConst{setpmf}{\isaconst{set\isaunderscore pmf}}
+\DeclareIsaConst{condpmf}{\isaconst{cond\isaunderscore pmf}}
+\DeclareIsaConst{pmf}{\isaconst{pmf}}
+
+\DeclareIsaConst{bernoulli}{\isaconst{bernoulli\isaunderscore pmf}}
+\DeclareIsaConst{pmfofset}{\isaconst{pmf\isaunderscore of\isaunderscore set}}
+\DeclareIsaConst{binomial}{\isaconst{binomial\isaunderscore pmf}}
+\DeclareIsaConst{poisson}{\isaconst{poisson\isaunderscore pmf}}
+\DeclareIsaConst{geometric}{\isaconst{geometric\isaunderscore pmf}}
+
+\DeclareIsaType{stream}[1]{#1\ \isaconst{stream}}
+\DeclareIsaConst{shd}{\isaconst{shd}}
+\DeclareIsaConst{stl}{\isaconst{stl}}
+\DeclareIsaConst{tostream}{\isaconst{to\isaunderscore stream}}
+\DeclareIsaConst{SCons}{\isaconst{SCons}}
+\DeclareIsaConst{smap}{\isaconst{smap}}
+\DeclareIsaConst{sdrop}{\isaconst{sdrop}}
+\DeclareIsaConst{sset}{\isaconst{sset}}
+\DeclareIsaConst{sfirst}{\isaconst{sfirst}}
+\DeclareIsaConst{scount}{\isaconst{scount}}
+\DeclareIsaConst{Stream}[2]{{#1}\cdot{#2}}
+\DeclareIsaConst{alw}{\isaconst{alw}}
+\DeclareIsaConst{ev}{\isaconst{ev}}
+\DeclareIsaConst{evat}{\isaconst{ev\isaunderscore at}}
+\DeclareIsaConst{nxt}{\isaconst{nxt}}
+\DeclareIsaConst{HLD}{\isaconst{HLD}}
+\DeclareIsaConst{impl}{\isaconst{impl}}
+\DeclareIsaConst{suntil}{\isaconst{suntil}}
+\DeclareIsaConst{snth}[2]{#1~!!~#2}
+\DeclareIsaConst{streams}{\isaconst{streams}}
+
+\DeclareIsaConst{typedef}{\isacommand{typedef}}
+\DeclareIsaConst{codatatype}{\isacommand{codatatype}}
+\DeclareIsaConst{datatype}{\isacommand{datatype}}
+\DeclareIsaConst{liftdef}{\isacommand{lift\isaunderscore definition}}
+% \DeclareIsaConst{definition}{\isacommand{definition}}
+% \DeclareIsaConst{inductive}{\isacommand{inductive}}
+% \DeclareIsaConst{coinductive}{\isacommand{coinductive}}
+\DeclareIsaConst{is}{\isacommand{is}}
+\DeclareIsaConst{where}{\isacommand{where}}
+% \DeclareIsaConst{primcorec}{\isacommand{primcorec}}
+% \DeclareIsaConst{primrec}{\isacommand{primrec}}
+\DeclareIsaConst{locale}{\isacommand{locale}}
+\DeclareIsaConst{assumes}{\isacommand{assumes}}
+\DeclareIsaConst{fixes}{\isacommand{fixes}}
+\DeclareIsaConst{Kand}{\isacommand{and}}
+ \DeclareIsaConst{partial}{\isacommand{partial\isaunderscore function}}
+% \DeclareIsaConst{fun}{\isacommand{fun}}
+
+\DeclareIsaConst{accessible}{\isaconst{acc}}
+\DeclareIsaConst{accon}{\isaconst{acc\isaunderscore on}}
+\DeclareIsaConst{communicating}{\isaconst{communicating}}
+\DeclareIsaConst{essential}{\isaconst{essential\isaunderscore class}}
+\DeclareIsaConst{recurrent}{\isaconst{recurrent}}
+\DeclareIsaConst{posrecurrent}{\isaconst{posrecurrent}}
+\DeclareIsaConst{stat}{\isaconst{stat}}
+
+\DeclareIsaConst{enabled}{\isaconst{enabled}}
+\DeclareIsaConst{walk}{\isaconst{walk}}
+
+\DeclareIsaConst{fair}{\isaconst{fair}}
+
+
+\DeclareIsaConst{atleft}[2]{{#1} \xrightarrow{z \to 1^-} {#2}}
+\DeclareIsaConst{atinf}[3]{{#2} \xrightarrow{#1 \to \infty} {#3}}
+
+\DeclareIsaConst{stationarydistribution}{\isaconst{stationary\isaunderscore distribution}}
+\DeclareIsaConst{aperiodic}{\isaconst{aperiodic}}
+\DeclareIsaConst{map}{\isaconst{map}}
+\DeclareIsaConst{distinct}{\isaconst{distinct}}
+
+\DeclareIsaConst{DTMC}{\isaconst{DTMC}}
+
+\DeclareIsaType{cfg}[1]{#1~\isatype{cfg}}
+\DeclareIsaConst{Cfg}{\isaconst{Cfg}}
+\DeclareIsaConst{state}{\isaconst{state}}
+\DeclareIsaConst{action}{\isaconst{action}}
+\DeclareIsaConst{cont}{\isaconst{cont}}
+
+\DeclareIsaConst{Kcfg}{\isaconst{K\isaunderscore cfg}}
+
+\DeclareIsaConst{cfgon}{\isaconst{cfg\isaunderscore on}}
+\DeclareIsaConst{memorylesson}{\isaconst{memoryless\isaunderscore on}}
+\DeclareIsaConst{Einf}{\isaconst{E\isaunderscore inf}}
+\DeclareIsaConst{Esup}{\isaconst{E\isaunderscore sup}}
+\DeclareIsaConst{Pinf}{\isaconst{P\isaunderscore inf}}
+\DeclareIsaConst{Psup}{\isaconst{P\isaunderscore sup}}
+
+\DeclareIsaType{pgcl}[1]{#1~\isatype{pgcl}}
+\DeclareIsaConst{Empty}{\isaconst{Empty}}
+\DeclareIsaConst{Skip}{\isaconst{Skip}}
+\DeclareIsaConst{Halt}{\isaconst{Halt}}
+\DeclareIsaConst{Assign}{\isaconst{Assign}}
+\DeclareIsaConst{Seq}{\isaconst{Seq}}
+\DeclareIsaConst{Par}{\isaconst{Par}}
+\DeclareIsaConst{If}{\isaconst{If}}
+\DeclareIsaConst{Prob}{\isaconst{Prob}}
+\DeclareIsaConst{While}{\isaconst{While}}
+
+\DeclareIsaConst{wp}{\isaconst{wp}}
+\DeclareIsaConst{step}{\isaconst{step}}
+\DeclareIsaConst{det}[2]{\textcolor{purple}{\ll} #1\textcolor{purple}{,} #2 \textcolor{purple}{\gg}}
+\DeclareIsaConst{r}{\isaconst{r}}
+\DeclareIsaConst{ert}{\isaconst{ert}}
+
+\DeclareIsaConst{wf}{\isaconst{wf}}
+\DeclareIsaConst{fp}{\isaconst{fp}}
+
+\DeclareIsaConst{DERIV}[3]{#1~\isaconst{has\isaunderscore derivative}~#3~(\isaconst{at}~#2)}
+
+% \DeclareIsaConst{`}{\mathbin{`}} use list-comprehension
+\DeclareIsaConst{rimage}[2]{#1 \mathbin{``} #2}
+
+\DeclareIsaConst{o}{\circ}
+\DeclareIsaConst{card_of}[1]{|#1|}
+\DeclareIsaType{bset}[2]{#1\ \isatype{set}^{#2}}
+\DeclareIsaType{nebset}[2]{#1\ \isatype{set}_{\scriptscriptstyle 1}^{#2}}
+\DeclareIsaConst{rel_pmf}{\isaconst{rel}_{\isatype{pmf}}}
+\DeclareIsaConst{map_pmf}{\isaconst{map}_{\isatype{pmf}}}
+\DeclareIsaConst{set_pmf}{\isaconst{set}_{\isatype{pmf}}}
+\DeclareIsaConst{bind_pmf}{\isaconst{bind}_{\isatype{pmf}}}
+\DeclareIsaConst{return_pmf}{\isaconst{return}_{\isatype{pmf}}}
+\DeclareIsaConst{cond_pmf}{\isaconst{cond}_{\isatype{pmf}}}
+
+\DeclareIsaType{MC}{\isatype{MC}}
+\DeclareIsaType{LMC}[1]{#1\ \isatype{LMC}}
+\DeclareIsaType{LMDP}[2]{#1\ \isatype{LMDP}^{#2}}
+\DeclareIsaType{DLTS}[1]{#1\ \isatype{DLTS}}
+\DeclareIsaType{LTS}[2]{#1\ \isatype{LTS}^{#2}}
+\DeclareIsaType{React}[1]{#1\ \isatype{React}}
+\DeclareIsaType{Gen}[1]{#1\ \isatype{Gen}}
+\DeclareIsaType{Str}[1]{#1\ \isatype{Str}}
+\DeclareIsaType{Alt}[2]{#1\ \isatype{Alt}^{#2}}
+\DeclareIsaType{SSeg}[2]{#1\ \isatype{SSeg}^{#2}}
+\DeclareIsaType{Seg}[2]{#1\ \isatype{Seg}^{#2}}
+\DeclareIsaType{Bun}[2]{#1\ \isatype{Bun}^{#2}}
+\DeclareIsaType{PZ}[3]{#1\ \isatype{PZ}^{#2,\,#3}}
+\DeclareIsaType{MG}[3]{#1\ \isatype{MG}^{#2,\,#3}}
+\DeclareIsaType{Var}[3]{(#1,\,#2)\ \isatype{Var}^{#3}}
+\DeclareIsaType{Var'}[3]{(#1,\,#2)\ \isatype{Var}_{0}^{#3}}
+\DeclareIsaConst{rel_Var}{\isaconst{rel}_{\isatype{Var}}}
+\DeclareIsaConst{var_eq}{\Join}
+
+\DeclareIsaType{F}[1]{#1\ \isatype{F}}
+\DeclareIsaType{G}[1]{#1\ \isatype{G}}
+\DeclareIsaType{CF}{\isatype{C}_{\isatype{F}}}
+\DeclareIsaType{CG}{\isatype{C}_{\isatype{G}}}
+
+\DeclareIsaConst{mapF}{\isaconst{map}_{\isatype{F}}}
+\DeclareIsaConst{mapG}{\isaconst{map}_{\isatype{G}}}
+\DeclareIsaConst{setF}{\isaconst{set}_{\isatype{F}}}
+\DeclareIsaConst{bdF}{\isaconst{bd}_{\isatype{F}}}
+\DeclareIsaConst{relF}{\isaconst{rel}_{\isatype{F}}}
+
+\DeclareIsaConst{C}[1]{\isaconst{Ctr}_{\isatype{#1}}}
+\DeclareIsaConst{D}[1]{\isaconst{Dtr}_{\isatype{#1}}}
+\DeclareIsaConst{unfold}[1]{\isaconst{unfold}_{\isatype{#1}}}
+\DeclareIsaConst{emb}[2]{\isatype{#2}\_\isaconst{of}\_\isatype{#1}}
+\DeclareIsaConst{emb'}[2]{\overline{\c{emb}{#1}{#2}}}
+
+
+\DeclareIsaConst{map_bset}{\isaconst{map}_{\isatype{set}}}
+\DeclareIsaConst{set_bset}{\isaconst{set}_{\isatype{set}}}
+\DeclareIsaConst{rel_bset}{\isaconst{rel}_{\isatype{set}}}

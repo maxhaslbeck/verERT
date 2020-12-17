@@ -1,0 +1,269 @@
+% Author: Andreas Lochbihler, ETH Zurich
+% Version 0.2 (2014-11-19)
+
+\makeatletter
+% \newcommand{\gobble}{\@gobble}
+
+%Umsetzung von lateinischen Kleinbuchstaben in griechische:
+\def\greek@a{\alpha}
+\def\greek@b{\beta}
+\def\greek@c{\chi}
+\def\greek@d{\delta}
+\def\greek@e{\varepsilon}
+\def\greek@f{\varphi}
+\def\greek@g{\gamma}
+\def\greek@h{\eta}
+\def\greek@i{\iota}
+\def\greek@k{\kappa}
+\def\greek@l{\lambda}
+\def\greek@m{\mu}
+\def\greek@n{\nu}
+\def\greek@o{\omicron}
+\def\greek@p{\pi}
+\def\greek@q{\theta}
+\def\greek@r{\rho}
+\def\greek@s{\sigma}
+\def\greek@t{\tau}
+\def\greek@u{\upsilon}
+\def\greek@w{\omega}
+\def\greek@x{\xi}
+\def\greek@y{\psi}
+\def\greek@z{\zeta}
+\def\make@greek#1{\csname greek@#1\endcsname}
+\def\@allgreek#1#2\@stopallgreek{%
+  \make@greek{#1}%
+  \def\@testa{}\def\@testb{#2}%
+  \ifx\@testa\@testb\relax\else\@allgreek #2\@stopallgreek\fi
+}
+\newcommand{\greek}[1]{%
+  \def\@testa{}\def\@testb{#1}
+  \ifx\@testa\@testb\relax\else\@allgreek #1\@stopallgreek\fi%
+}
+
+% Formatierung fuer Formel-Konstanten
+% funktioniert auch mit Hoch-/Tiefstellung, Schriftgroesse des Kontexts wird uebernommen,
+% Vorschub ist 10% groesser als Schriftgroesse
+\newlength{\isa@vorschub}
+\ifx\beamer@version\relax
+  \newcommand{\@innersyntax}[2]{%
+    \def\@tempa##1{%
+      \setlength{\isa@vorschub}{##1pt}%
+      \mathord{\emph{\text{\fontsize{##1}{1.1\isa@vorschub}\selectfont#1#2}}}%
+    }%
+    \mathchoice%
+      {\@tempa{\tf@size}}%
+      {\@tempa{\tf@size}}%
+      {\@tempa{\sf@size}}%
+      {\@tempa{\ssf@size}}%
+  }%
+\else
+  \newcommand{\@innersyntax}[2]{%
+    \def\@tempa##1{%
+      \setlength{\isa@vorschub}{##1pt}%
+      \mathord{\text{\fontsize{##1}{1.1\isa@vorschub}\selectfont#1#2}}%
+    }%
+    \mathchoice%
+      {\@tempa{\tf@size}}%
+      {\@tempa{\tf@size}}%
+      {\@tempa{\sf@size}}%
+      {\@tempa{\ssf@size}}%
+  }%
+\fi
+\newcommand{\isaconst}[1]{\textsf{\textup{#1}}}
+\newcommand{\isatype}[1]{\textsf{\textup{#1}}}
+\newcommand{\isacommand}[1]{\textrm{\bfseries #1}}
+\newcommand{\isaminorkeyword}[1]{\textrm{#1}}
+\newcommand{\isaprooftemplate}{\langle\!\langle\mathord{\text{proof}}\rangle\!\rangle}
+\newcommand{\isanameprefix}[1]{\textit{#1}}
+\newcommand{\isamethod}[1]{\textrm{#1}}
+
+\def\DeclareIsaConst{\@star@or@long\Decl@reIs@Const}
+\def\Decl@reIs@Const#1{%
+  \expandafter\@testopt%
+    \expandafter{%
+    \expandafter\@newcommand%
+    \expandafter{%
+      \csname isa:const:#1\endcsname%
+    }%
+  }0%
+}
+
+\def\DeclareIsaType{\@star@or@long\Decl@reIs@Type}
+\def\Decl@reIs@Type#1{%
+  \expandafter\@testopt%
+    \expandafter{%
+    \expandafter\@newcommand%
+    \expandafter{%
+      \csname isa:type:#1\endcsname%
+    }%
+  }0%
+}
+
+\def\DeclareIs@Index#1#2#3#4#5{
+  \def\testa{}\def\testb{#5}%
+  \ifx\testa\testb
+    \expandafter\newcommand%
+    \csname isa:#1:#2\endcsname[1][]%
+    {%
+      \def\testa{}\def\testb{##1}\def\testc{(}\def\testd{)}%
+      \ifx\testa\testb
+        \index{#3@\isa{#4}}%
+      \else\ifx\testb\testc
+        \index{#3@\isa{#4}|(}%
+      \else\ifx\testb\testd
+        \index{#3@\isa{#4}|)}%
+      \else
+        \index{#3@\isa{#4}!##1}%
+      \fi\fi\fi
+    }%
+  \else
+    \expandafter\newcommand%
+    \csname isa:#1:#2\endcsname[1][]%
+    {%
+      \def\testa{}\def\testb{##1}\def\testc{(}\def\testd{)}%
+      \ifx\testa\testb
+        \index{#3@\isa{#4}\indexxpl{#5}}%
+      \else\ifx\testb\testc
+        \index{#3@\isa{#4}\indexxpl{#5}|(}%
+      \else\ifx\testb\testd
+        \index{#3@\isa{#4}\indexxpl{#5}|)}%
+      \else
+        \index{#3@\isa{#4}\indexxpl{#5}!##1}%
+      \fi\fi\fi
+    }
+  \fi
+}
+
+\def\DeclareIs@IndexSub#1#2#3#4#5{
+  \expandafter\newcommand%
+  \csname isa:#1:#2\endcsname[1][]%
+  {%
+    \def\testa{}\def\testb{##1}\def\testc{(}\def\testd{)}%
+    \ifx\testa\testb
+      \index{#3@\isa{#4}!#5}%
+    \else\ifx\testb\testc
+      \index{#3@\isa{#4}!#5|(}%
+    \else\ifx\testb\testd
+      \index{#3@\isa{#4}!#5|)}%
+    \else
+      \index{#3@\isa{#4}!#5!##1}%
+    \fi\fi\fi
+  }%
+}
+
+\def\DeclareIsaIndexTN{\DeclareIs@Index{indext}}
+\def\DeclareIsaIndexTS{\DeclareIs@IndexSub{indext}}
+\def\DeclareIsaIndexCN{\DeclareIs@Index{indexc}}
+\def\DeclareIsaIndexCS{\DeclareIs@IndexSub{indexc}}
+
+\newcommand{\DeclareIsaIndexT}{\@ifstar\DeclareIsaIndexTS\DeclareIsaIndexTN}
+\newcommand{\DeclareIsaIndexC}{\@ifstar\DeclareIsaIndexCS\DeclareIsaIndexCN}
+
+\DeclareRobustCommand{\isa}[1]{\bgroup\activateisacommands \ensuremath{#1}\egroup}
+\def\inner@synt@x#1#2{%
+  \expandafter\ifx\csname isa:#1:#2\endcsname\relax%
+    \relax \@latex@error{Isabelle #1 #2 undefined}\@ehc%
+  \else%
+    \def\@tempa{\csname isa:#1:#2\endcsname}%
+    \expandafter\@tempa%
+  \fi%
+}
+\newcommand{\activateisacommands}{%
+  \def\c{\inner@synt@x{const}}%
+  \def\t{\inner@synt@x{type}}%
+  \def\tv##1{\greek{##1}}%
+  \def\hastype{\mathrel{::}}%
+  \def\hassort{\mathrel{::}}%
+  \def\command{\isacommand}%
+  \def\minorkeyword{\isaminorkeyword}%
+  \def\prooftemplate{\isaprooftemplate}%
+  \def\nameprefix{\isanameprefix}%
+  \def\llistOf{\overline}%
+  \def\listOf{\underline}%
+}
+\newcommand{\isaindexc}{\inner@synt@x{indexc}}
+\newcommand{\isaindext}{\inner@synt@x{indext}}
+\makeatother
+
+% Reference Isabelle theorems in LaTeX text by name without printing
+\newcommand{\refthm}[1]{}
+
+\newcommand{\isaunderscore}{\mbox{-}}
+
+% Koinduktive Regeln mit doppelter Linie
+\makeatletter
+\newlength\conclusion@length
+\newcommand{\oldcoinferrule}[2]{%
+  \def\@premise{#1}%
+  \def\@conclusion{\ensuremath{#2}}%
+  \def\@testb{ }%
+  \ifx\@premise\@testb%
+    \relax
+    \settowidth\conclusion@length{\@conclusion}%
+    \def\@premise{\rule{\conclusion@length}{0cm}}%
+  \fi%
+  \ensuremath{{\mprset{fraction={===}}\inferrule{\@premise}{\@conclusion}}}%
+}
+\makeatother
+
+\makeatletter
+\newlength{\extrarowsep}
+\setlength{\extrarowsep}{1.8ex}
+\newcommand{\rowsep}{%
+  \noalign{\ifnum0=`}\fi
+  \@ifnextchar[{\@rowsep}{\@rowsep[\extrarowsep]}%
+}
+\def\@rowsep[#1]{%
+  \hrule height #1 width 0cm \relax \ifnum0=`{\fi}%
+}
+\makeatother
+
+% Tabelle fuer inferrules, die zweite Spalte fuer die Regeln nimmt so viel Platz wie moeglich,
+% weniger dem Platz der ersten Spalte
+\newlength{\formulacolumnwidth}%
+\newenvironment{inferruletable}[1][\linewidth]{%
+  % X-Spalte zentriert setzen
+  \renewcommand{\tabularxcolumn}[1]{>{\setlength{\formulacolumnwidth}{##1}}c}%
+  \let\oldinferrule=\inferrule%
+  \let\oldcoinferrule=\coinferrule%
+  \renewcommand{\inferrule}[2]{\ensuremath{\hsize=\formulacolumnwidth\oldinferrule{##1}{##2}}}%
+  \renewcommand{\coinferrule}[2]{\ensuremath{\hsize=\formulacolumnwidth\oldcoinferrule{##1}{##2}}}%
+  \tabularx{#1}{@{}l@{~}X@{}}%
+}{
+  \endtabularx%
+}
+
+
+
+\makeatletter
+\def\@gatherrulesand{%
+  \ifmmode $ \fi%
+  \hskip 2em plus 0.5fil minus 0.5em%
+  $%
+}
+\def\gatherrules@bindings{%
+  \let\par\@gatherrulesand%
+}
+\newenvironment{gatherrules}{%
+  \trivlist \centering \item\relax 
+  \lineskiplimit=1.2em\lineskip=1.2em plus 0.2em%
+  \bgroup%
+  \gatherrules@bindings%
+  \protect\centering%
+  $%
+}{$\egroup \endtrivlist}
+\makeatother
+
+\colorlet{greybackground}{black!25}
+\colorlet{greyforeground}{black!50}
+\newcommand{\highlight}[1]{\colorbox{greybackground}{$\!#1\!$}}
+\newcommand{\highlightsmash}[1]{\vphantom{Ag}\smash{\highlight{\vphantom{X}\smash{#1}}}}
+
+\newlength{\spacewidth}
+\newcommand{\halfspace}{\settowidth{\spacewidth}{\ }\relax\hspace{0.5\spacewidth}}
+
+\newcommand{\programfont}{\tt}
+\newcommand{\programtext}[1]{\texttt{#1}}
+
+\newcommand{\marknewfeature}{$\ast$}
+

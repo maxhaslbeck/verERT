@@ -1,7 +1,23 @@
 \<^marker>\<open>creator "Johannes Hölzl"\<close>
+chapter \<open>MDP Semantics for PGCL\<close>
 theory MDP_Semantics
   imports PGCL
 begin
+
+paragraph \<open>Summary\<close>
+
+text \<open>This theory provides an operational interpretation of pGCL running times as MDPs,
+      and proves its equivalence to pGCL's the denotational expectation running
+         transformer semantics.\<close>
+
+paragraph \<open>Main Lemmas\<close>
+
+text \<open>
+  \<^item> ert_eq_Ert: the equivalence of pGCL's the denotational expectation running
+         transformer semantics and an operational interpretation of pGCL running times as MDPs.\<close>
+
+section \<open>Operational Semantics of pGCL\<close>
+
 
 abbreviation det :: "'s pgcl \<Rightarrow> 's \<Rightarrow> ('s pgcl \<times> 's) pmf set" ("\<lless> _, _ \<ggreater>") where
   "det c s \<equiv> {return_pmf (c, s)}"

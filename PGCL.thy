@@ -1,9 +1,28 @@
 \<^marker>\<open>creator "Johannes Hölzl"\<close>
+chapter \<open>Probabilistic Guarded Command Language\<close>
 theory PGCL
   imports verERT_Misc
 begin
 
-section \<open>Probabilistic Guarded Command Language\<close>
+paragraph \<open>Summary\<close>
+
+
+text \<open>This theory introduces the probabilistic guarded command language pGCL.
+    It also introduces the weakest preexpectation transformer, and the expected running time
+    transformer.
+    Then proves some general properties of @{term ert} \<close>
+
+
+paragraph \<open>Main Definitions\<close>
+
+text \<open>
+  \<^item> pgcl:  the type of deeply embedded pGCL programs
+  \<^item> wp: the weakest preexpectation transformer
+  \<^item> ert: the expected running time transformer
+\<close>
+
+
+section \<open>Definition of PGCL and transformers\<close>
 
 datatype 'a pgcl = Empty
                  | Skip

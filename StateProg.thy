@@ -1,6 +1,6 @@
 \<^marker>\<open>creator "Maximilian P. L. Haslbeck"\<close>
 theory StateProg
-imports MDP_Semantics PGCLMisc
+imports MDP_Semantics PGCL_Misc
 begin
 
 

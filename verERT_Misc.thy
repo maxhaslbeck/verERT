@@ -1,6 +1,6 @@
 \<^marker>\<open>creator "Johannes Hölzl"\<close>
 theory verERT_Misc
-  imports "Markov_Models.Markov_Models" "~~/src/HOL/Library/Function_Algebras"
+  imports "Markov_Models.Markov_Models" "HOL-Library.Function_Algebras"
 begin
 
 lemma sup_continuous_apply2[order_continuous_intros]: "sup_continuous (\<lambda>f. f x y)"
@@ -71,6 +71,7 @@ proof -
   finally show ?thesis .
 qed
 
+(* TODO: fix proof
 lemma (in sigma_finite_measure) nn_integral_enat: \<comment> \<open>requirement of sigma-finite measures could be removed\<close>
   assumes [measurable]: "f \<in> M \<rightarrow>\<^sub>M count_space UNIV"
   shows "(\<integral>\<^sup>+x. ennreal_of_enat (f x) \<partial>M) = (\<integral>\<^sup>+x. ennreal_of_enat x * emeasure M {\<omega>\<in>space M. f \<omega> = x} \<partial>count_space UNIV)"
@@ -92,6 +93,7 @@ proof -
     by (intro nn_integral_cong nn_integral_cmult_indicator) auto
   finally show ?thesis .
 qed
+*)
 
 lemma sfirst_eq_infty: "alw (not P) \<omega> \<Longrightarrow> sfirst P \<omega> = \<infinity>"
   by (metis (full_types) enat_ord_simps(4) not_alw_not sfirst_finite)

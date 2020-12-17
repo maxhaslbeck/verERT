@@ -1,4 +1,4 @@
-# verERT - Verified expected running time of probabilistic programs
+# Verified expected running time of probabilistic programs
 
 This repository verifies the analysis of expected running time of probabilistic programs in Isabelle/HOL.
 

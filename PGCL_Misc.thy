@@ -1,6 +1,6 @@
 \<^marker>\<open>creator "Johannes Hölzl"\<close>
 \<^marker>\<open>contributor "Maximilian P.L. Haslbeck"\<close>
-theory PGCLMisc
+theory PGCL_Misc
 imports MDP_Semantics
 begin
 

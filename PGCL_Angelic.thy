@@ -1,6 +1,5 @@
-(* Author: Johannes Hölzl <hoelzl@in.tum.de> *)
-
-section {* Probabilistic Guarded Command Language (pGCL) *}
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
+section \<open>Probabilistic Guarded Command Language (pGCL)\<close>
 
 theory PGCL_Angelic
   imports "Markov_Models.Markov_Decision_Process"

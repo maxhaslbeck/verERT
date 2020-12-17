@@ -1,5 +1,6 @@
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
 theory Direct_Semantics
-  imports Misc
+  imports verERT_Misc
 begin
 
 section \<open>Probabilistic Guarded Command Language\<close>
@@ -25,3 +26,5 @@ where
 | "wp (Par c\<^sub>1 c\<^sub>2) = wp c\<^sub>1 \<union> wp c\<^sub>2"
 | "wp (If g c\<^sub>1 c\<^sub>2) = (\<Union>I1\<in>wp c\<^sub>1. \<Union>I2\<in>wp c\<^sub>2. { \<lambda>s. if g s then I1 s else I2 s })"
 | "wp (While g c) = {}"
+
+end

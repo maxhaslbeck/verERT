@@ -10,7 +10,7 @@ setup_lifting type_definition_mono_fun
 instantiation mono_fun :: (order, complete_lattice) complete_lattice
 begin
 
-lift_definition less_eq_mono_fun :: "('a \<Rightarrow>\<^sub>m 'b) \<Rightarrow> ('a \<Rightarrow>\<^sub>m 'b) \<Rightarrow> bool" is "op \<le>" .
+lift_definition less_eq_mono_fun :: "('a \<Rightarrow>\<^sub>m 'b) \<Rightarrow> ('a \<Rightarrow>\<^sub>m 'b) \<Rightarrow> bool" is "(\<le>)" .
 
 definition less_mono_fun :: "('a \<Rightarrow>\<^sub>m 'b) \<Rightarrow> ('a \<Rightarrow>\<^sub>m 'b) \<Rightarrow> bool"
 where

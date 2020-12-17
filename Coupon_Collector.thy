@@ -1,3 +1,4 @@
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
 theory Coupon_Collector
   imports PGCL
 begin
@@ -159,10 +160,10 @@ proof -
           of_nat_diff ennreal_times_divide[symmetric] divide_simps)
         apply (auto simp add: C_def card_insert_if finite_subset outer)
         done
-    qed auto
+    qed (auto simp: SUP_image)
     with outer show ?case
       by (auto simp: cc_body_def cc'_body_def)
-  qed auto
+  qed (auto simp: SUP_image)
 
   { fix W :: "nat \<times> bool \<Rightarrow> ennreal" and x :: "nat \<times> bool" assume "fst x < N"
     let ?f = "\<lambda>W' x. 1 + (if snd x then W' x else 1 + (1 + W (Suc (fst x), True)))"
@@ -183,7 +184,7 @@ proof -
           apply (cases x)
           apply (simp add: field_simps one_add_one[symmetric] del: one_add_one)
           done
-      qed auto
+      qed (auto simp: SUP_image)
       also have "\<dots> = (2 + (2 + W (Suc i, True)) * (1 - real i / N)) / (1 - real i / real N)"
         using \<open>i < N\<close> by (subst lfp_linear) (simp_all add: ennreal_minus[symmetric])
       also have "\<dots> = 2 / (1 - real i / real N) + 2 + W (Suc i, True)"

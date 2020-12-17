@@ -1,3 +1,4 @@
+\<^marker>\<open>creator "Maximilian P. L. Haslbeck"\<close>
 theory StateProg
 imports MDP_Semantics PGCLMisc
 begin
@@ -178,7 +179,7 @@ next
   have "ert (compile (WHILE b DO C)) (f+g) = (\<Squnion>i. (?C (f+g) ^^ i) \<bottom>)" by(rule ert_sup) 
   also have "\<dots> = (\<Squnion>i. (?C f ^^ i) \<bottom> + (?W g ^^ i) \<bottom>)" by(simp only: 1)
   also have "\<dots> = (\<Squnion>i. (?C f ^^ i) \<bottom>) + (\<Squnion>i. (?W g ^^ i) \<bottom>)"
-    apply(auto intro!: ext SUP_add_directed_ennreal)
+    apply(auto simp: SUP_image intro!: ext SUP_add_directed_ennreal)
     subgoal for s i j apply (rule exI[where x="max i j"])  by(auto simp add: chara_mono charaErt_mono add_mono)
     done
   also have "\<dots> = ert (compile (WHILE b DO C)) f + wp (compile (WHILE b DO C)) g"
@@ -235,14 +236,14 @@ next
   } note 1=this
 
   have *: "(\<lambda>s. a * (\<Squnion>i. (chara b C f1 ^^ i) \<bottom>) s) = (\<Squnion>i. (\<lambda>s. a * ((chara b C f1 ^^ i) \<bottom> s)) )" 
-    by (auto simp: SUP_mult_left_ennreal) 
+    by (auto simp: SUP_image SUP_mult_left_ennreal) 
   have "wp (compile (WHILE b DO C)) ((\<lambda>s. a * f1 s) + f2)
       = (\<Squnion>i. (chara b C ((\<lambda>s. a * f1 s) + f2) ^^ i) \<bottom>)" by(rule wp_sup)
   also have "\<dots> = (\<Squnion>i. (\<lambda>s. a * ((chara b C f1 ^^ i) \<bottom> s))  + (chara b C f2 ^^ i) \<bottom>)" 
     by(simp only: 1)
   also have "\<dots> = (\<Squnion>i. (\<lambda>s. a * ((chara b C f1 ^^ i) \<bottom> s)) ) + (\<Squnion>i. (chara b C f2 ^^ i) \<bottom>)"   
     proof -
-    show ?thesis apply (auto intro!: ext SUP_add_directed_ennreal)      
+    show ?thesis apply (auto simp: SUP_image intro!: ext SUP_add_directed_ennreal)      
       subgoal for s i j apply (rule exI[where x="max i j"]) 
         by (simp add: chara_mono mult_left_mono add_mono)   
       done

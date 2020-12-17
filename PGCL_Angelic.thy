@@ -3,7 +3,7 @@
 section {* Probabilistic Guarded Command Language (pGCL) *}
 
 theory PGCL_Angelic
-  imports "$AFP/Markov_Models/Markov_Decision_Process"
+  imports "Markov_Models.Markov_Decision_Process"
 begin
 
 datatype 's pgcl =
@@ -61,7 +61,7 @@ abbreviation r :: "('s \<Rightarrow> ennreal) \<Rightarrow> ('s pgcl \<times> 's
 
 lemma continuous_rF: "sup_continuous (rF f)"
   unfolding rF_def[abs_def]
-  by (auto simp: sup_continuous_def fun_eq_iff SUP_sup_distrib[symmetric]
+  by (auto simp: sup_continuous_def fun_eq_iff SUP_sup_distrib[symmetric] SUP_image
            simp del: sup_ennreal_def
            split: prod.splits pgcl.splits)
 
@@ -92,15 +92,15 @@ lemma measurable_rF:
 lemma measurable_r[measurable]: "r f \<in> borel_measurable step.St"
   using continuous_rF measurable_rF by (rule borel_measurable_lfp)
 
-lemma mono_r': "mono (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>D)"
+lemma mono_r': "mono (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>measure_pmf D)"
   by (auto intro!: monoI le_funI SUP_mono[OF bexI] nn_integral_mono simp: le_fun_def)
 
 lemma E_sup_r:
   "step.E_sup s (r f) =
-    lfp (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>D) s"
+    lfp (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>measure_pmf D) s"
 proof -
   have "step.E_sup s (r f) =
-    lfp (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>D) s"
+    lfp (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>measure_pmf D) s"
     unfolding rF_def[abs_def]
   proof (rule step.E_sup_lfp[THEN fun_cong])
     let ?F = "\<lambda>t x. (if fst t = Skip then f (snd t) else x)"
@@ -121,14 +121,14 @@ proof -
 qed
 
 lemma E_sup_r_unfold:
-  "step.E_sup s (r f) = (\<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else step.E_sup t (r f)) \<partial>D)"
+  "step.E_sup s (r f) = (\<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else step.E_sup t (r f)) \<partial>measure_pmf D)"
   unfolding E_sup_r by (simp add: lfp_unfold[OF mono_r'])
 
 lemma E_sup_r_induct[consumes 1, case_names step]:
   assumes "P s y"
   assumes *: "\<And>F s y. P s y \<Longrightarrow>
     (\<And>s y. P s y \<Longrightarrow> F s \<le> y) \<Longrightarrow> (\<And>s. F s \<le> step.E_sup s (r f)) \<Longrightarrow>
-    (\<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>D) \<le> y"
+    (\<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>measure_pmf D) \<le> y"
   shows "step.E_sup s (r f) \<le> y"
   using `P s y`
   unfolding E_sup_r
@@ -149,14 +149,14 @@ proof (rule antisym)
     case step then show ?case
       by (rewrite in "_ \<le> \<hole>" E_sup_r_unfold)
          (force intro!: SUP_mono[OF bexI] nn_integral_mono intro: le_infI2
-                simp: E_sup_Skip simp del: inf_ennreal_def)
+                simp: E_sup_Skip SUP_image simp del: inf_ennreal_def)
   qed
   show "step.E_sup (a, s) (r (\<lambda>s. step.E_sup (b, s) (r f))) \<le> step.E_sup (Seq a b, s) (r f)"
   proof (coinduction arbitrary: a s rule: E_sup_r_induct)
     case step then show ?case
       by (rewrite in "_ \<le> \<hole>" E_sup_r_unfold)
          (force intro!: SUP_mono[OF bexI] nn_integral_mono intro: le_infI2
-                simp: E_sup_Skip simp del: inf_ennreal_def)
+                simp: E_sup_Skip SUP_image simp del: inf_ennreal_def)
    qed
 qed
 
@@ -176,12 +176,12 @@ proof (rule antisym)
       by (rewrite E_sup_While_step) (auto intro!: step.E_sup_mono mono_r le_funI)
   qed (auto intro: SUP_least)
 
-  def w \<equiv> "\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then if g (snd t) then F (c, snd t) else f (snd t) else F t) \<partial>D"
+  define w where "w \<equiv> \<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then if g (snd t) then F (c, snd t) else f (snd t) else F t) \<partial>measure_pmf D"
   have "mono w"
     by (auto simp: w_def mono_def le_fun_def intro!: SUP_mono[OF bexI] nn_integral_mono) []
 
-  def d \<equiv> c
-  def t \<equiv> "Seq d (While g c)"
+  define d where "d \<equiv> c"
+  define t where "t \<equiv>Seq d (While g c)"
   then have "(t = While g c \<and> d = c \<and> g s) \<or> t = Seq d (While g c)"
     by auto
   then have "step.E_sup (t, s) (r f) \<le> lfp w (d, s)"
@@ -195,7 +195,7 @@ proof (rule antisym)
       note [simp] = this
       assume "t = Seq d (While g c)" then show ?thesis
         by (rewrite lfp_unfold[OF \<open>mono w\<close>])
-           (auto simp: max.absorb2 w_def intro!: SUP_mono[OF bexI] nn_integral_mono step)
+           (auto simp: max.absorb2 w_def SUP_image intro!: SUP_mono[OF bexI] nn_integral_mono step)
     qed (auto intro!: step)
   qed
   also have "lfp w = lfp (\<lambda>F s. step.E_sup s (r (\<lambda>s. if g s then F (c, s) else f s)))"
@@ -218,7 +218,7 @@ proof (induction c arbitrary: f s)
 next
   case Abort then show ?case
   proof (intro antisym)
-    have "lfp (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>D) \<le>
+    have "lfp (\<lambda>F s. \<Squnion>D\<in>step s. \<integral>\<^sup>+ t. (if fst t = Skip then f (snd t) else F t) \<partial>measure_pmf D) \<le>
       (\<lambda>s. if \<exists>t. s = (Abort, t) then 0 else \<top>)"
       by (intro lfp_lowerbound) (auto simp: le_fun_def)
     then show "step.E_sup (Abort, s) (r f) \<le> wp Abort f s"

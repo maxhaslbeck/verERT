@@ -1,13 +1,14 @@
-theory Misc
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
+theory verERT_Misc
   imports "Markov_Models.Markov_Models" "~~/src/HOL/Library/Function_Algebras"
 begin
 
 lemma sup_continuous_apply2[order_continuous_intros]: "sup_continuous (\<lambda>f. f x y)"
-  by (auto simp: sup_continuous_def)
+  using sup_continuous_apply sup_continuous_applyD by fastforce
 
 lemma measurable_ident_subsets:
   "space M = space M' \<Longrightarrow> sets M' \<subseteq> sets M \<Longrightarrow> (\<lambda>x. x) \<in> measurable M M'"
-  sorry (* apply (simp add: measurable_def image_subset_iff_funcset[symmetric] subset_eq) loops in isabelle2016-1*)
+  by (metis measurable_id measurable_iff_sets subset_trans)
 
 lemma sets_stream_space_mono:
   "space N = space M \<Longrightarrow> M \<subseteq> N \<Longrightarrow> sets (stream_space M) \<subseteq> sets (stream_space N)"
@@ -147,7 +148,7 @@ lemma sfirst_translate:
 lemma sup_continuous_ennreal_of_enat[order_continuous_intros]:
   "sup_continuous f \<Longrightarrow> sup_continuous (\<lambda>i. ennreal_of_enat (f i))"
   by (rule sup_continuous_compose[of ennreal_of_enat])
-     (auto simp: sup_continuous_def ennreal_of_enat_Sup)
+     (auto simp: sup_continuous_def ennreal_of_enat_Sup SUP_image)
 
 lemma (in MC_syntax) sfirst_lfp:
   "(\<integral>\<^sup>+\<omega>. sfirst (HLD Y) \<omega> \<partial>T x) = lfp (\<lambda>F x. \<integral>\<^sup>+y. (F y + 1) * indicator (-Y) y \<partial>K x) x"

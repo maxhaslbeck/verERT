@@ -1,3 +1,4 @@
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
 theory MDP_Semantics
   imports PGCL
 begin
@@ -24,7 +25,7 @@ qed
 
 abbreviation Estep :: "('a pgcl \<Rightarrow> 'a \<Rightarrow> ennreal) \<Rightarrow> 'a pgcl \<Rightarrow> 'a \<Rightarrow> ennreal"
 where
-  "Estep F c s \<equiv> (\<Squnion>D\<in>K (c, s). \<integral>\<^sup>+(c', s'). F c' s' \<partial>D)"
+  "Estep F c s \<equiv> (\<Squnion>D\<in>K (c, s). \<integral>\<^sup>+(c', s'). F c' s' \<partial>measure_pmf D)"
 
 context
   fixes f :: "'a \<Rightarrow> ennreal"
@@ -152,7 +153,7 @@ where
   "cost_step F c s = cost c s (Estep F c s)"
 
 lemma cost_step_alt: "cost_step F c s = Estep (\<lambda>c' s'. cost c s (F c' s')) c s"
-  by (induction c arbitrary: s F) (auto simp: split_beta' cost_step_def nn_integral_add)
+  by (induction c arbitrary: s F) (auto simp: split_beta' cost_step_def nn_integral_add SUP_image)
 
 lemma cost_step_Empty[simp]: "cost_step F Empty s = f s"
   by (simp add: cost_step_def)
@@ -162,7 +163,7 @@ lemma cost_step_Halt[simp]: "cost_step F Halt s = 0"
 
 lemma cost_step_Seq: "cost_step F (Seq c d) s =
     (if c = Empty then F d s else cost_step (\<lambda>c. F (case c of Empty \<Rightarrow> d | Halt \<Rightarrow> Halt | _ \<Rightarrow> Seq c d)) c s)"
-  by (auto simp add: split_beta' cost_step_def
+  by (auto simp add: split_beta' cost_step_def SUP_image
            intro!: arg_cong[where f="cost _ _"] SUP_cong nn_integral_cong arg_cong[where f="\<lambda>x. F x _"]
            split: pgcl.split)
 
@@ -216,7 +217,7 @@ next
   show "(\<lambda>c s. E_sup (c::'a pgcl, s) (\<lambda>\<omega>. (\<Squnion>i. C i) ((c, s) ## \<omega>))) =
       (\<Squnion>i. (\<lambda>c s. E_sup (c, s) (\<lambda>\<omega>. C i ((c, s) ## \<omega>))))"
     if C: "incseq C" and [measurable]: "\<And>i. C i \<in> St \<rightarrow>\<^sub>M borel" for C
-    by (simp add: fun_eq_iff mono_compose[OF C] E_sup_SUP)
+    by (simp add: fun_eq_iff mono_compose[OF C] E_sup_SUP SUP_image)
 qed (auto intro: sup_continuous_cost_step sup_continuous_cost_stream simp: SUP_apply[abs_def] le_fun_def E_sup_const)
 
 lemma Ert_eq: "Ert f c s = lfp (cost_step f) c s"

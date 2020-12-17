@@ -1,3 +1,5 @@
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
+\<^marker>\<open>contributor "Maximilian P.L. Haslbeck"\<close>
 theory PGCLMisc
 imports MDP_Semantics
 begin

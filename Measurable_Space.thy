@@ -1,5 +1,7 @@
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
+(* MH: This theory seems do be obsolete. There is HOL-Analysis.Measurable_Space *)
 theory Measurable_Space
-  imports Probability
+  imports "HOL-Probability.Probability"
 begin
 
 subsection \<open>Typeclass for measurable spaces\<close>

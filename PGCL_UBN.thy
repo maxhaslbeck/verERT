@@ -1,5 +1,6 @@
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
 theory PGCL_UBN
-  imports Misc
+  imports verERT_Misc
 begin
 
 section \<open>Probabilistic Guarded Command Language\<close>
@@ -118,7 +119,7 @@ next
     then have "(SUP n::nat. (\<lambda>_. min k n)) \<le> u"
       by (intro SUP_least)
     also have "(SUP n::nat. (\<lambda>_. min k n)) = (\<lambda>x. k)"
-      by (auto intro!: antisym SUP_least le_funI simp: inf_min[symmetric] inf_SUP[symmetric] ennreal_SUP_of_nat_eq_top)
+      by (auto intro!: antisym SUP_least le_funI simp: SUP_image inf_min[symmetric] inf_SUP[symmetric] ennreal_SUP_of_nat_eq_top)
     finally show "(\<lambda>x. k) \<le> u" .
   qed
 

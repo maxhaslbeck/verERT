@@ -1,3 +1,4 @@
+\<^marker>\<open>creator "Johannes Hölzl"\<close>
 theory Random_Walk
   imports PGCL
 begin

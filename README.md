@@ -16,14 +16,14 @@ formalization is in PGCL.thy
 
 Currently it mainly consists of an equivalence proof between the denotational
 expectation running transformer semantics and an operational interpretation of
-pGCL running times as MDPs (in [MDP_Semantics.thy]). The proof is based on the
+pGCL running times as MDPs (in [MDP_Semantics](MDP_Semantics.thy). The proof is based on the
 definitions of Kaminski et al [1]. The proof itself is different, it follows
 the equivalence proof in [2], where we use least fixed-points and transfer
 rules on them.
 
-In [Random_Walk.thy] we prove that the expected running time of an symmetric
+In [Random_Walk](Random_Walk.thy) we prove that the expected running time of an symmetric
 simple random walk is actually infinite.
-In [Coupon_Collector.thy] we prove the expected running time of the coupon collector
+In [Coupon_Collector](Coupon_Collector.thy) we prove the expected running time of the coupon collector
 problem.
 
 This work is described in the the ITP'16 paper [3].
@@ -42,10 +42,10 @@ This work is described in the the ITP'16 paper [3].
 ### A new proof rule for ERT of f-iid loops
 
 We prove the rule for ERT of f-iid loops (Theorem 4 in [4]) and generalize it to
-angelic weakest preexpectation (in [ERT_Of_IID_Loop.thy]).
+angelic weakest preexpectation (in [ERT_Of_IID_Loop](ERT_Of_IID_Loop.thy)).
 
 We use it shorten the analysis of the inner loop of the coupon collector problem
-considerabley: see [Coupon_Collector_Inner.thy]. 
+considerabley: see [Coupon_Collector_Inner](Coupon_Collector_Inner.thy). 
 
 [4] How long, O Bayesian network, will I sample thee? --
 Kevin Batz, Benjamin Lucien Kaminski, Joost-Pieter Katoen, Christoph Matheja
@@ -56,7 +56,7 @@ Kevin Batz, Benjamin Lucien Kaminski, Joost-Pieter Katoen, Christoph Matheja
 We generalize the quantitative Hoare Logic by Carbonneaux to handle the expected
 running time of probabilistic programs. We follow the paper by Ngo et al [5] only
 restricted to programs *without* procedures. We prove soundness *and* completeness
-of the calculus. Also we provide a VCG and prove it sound and complete. ([Probabilistic_Quantitative_Hoare_Logic]).
+of the calculus. Also we provide a VCG and prove it sound and complete. ([Probabilistic_Quantitative_Hoare_Logic](Probabilistic_Quantitative_Hoare_Logic)).
 This is a astonishingly straightward extension of the quantitative Hoare Logic which
 we verified in [an AFP entry](https://www.isa-afp.org/browser_info/current/AFP/Hoare_Time/Quant_Hoare.html).
 

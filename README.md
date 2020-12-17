@@ -16,7 +16,7 @@ formalization is in PGCL.thy
 
 Currently it mainly consists of an equivalence proof between the denotational
 expectation running transformer semantics and an operational interpretation of
-pGCL running times as MDPs (in [MDP_Semantics](MDP_Semantics.thy). The proof is based on the
+pGCL running times as MDPs (in [MDP_Semantics](MDP_Semantics.thy)). The proof is based on the
 definitions of Kaminski et al [1]. The proof itself is different, it follows
 the equivalence proof in [2], where we use least fixed-points and transfer
 rules on them.

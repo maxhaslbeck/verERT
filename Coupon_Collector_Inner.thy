@@ -30,7 +30,14 @@ definition "coco N = Assign ''b'' (\<lambda>s. return_pmf (0)) ;;
                      innerb N"
 
 
-subsection "Semantic Approach"
+subsection \<open>Semantic Approach\<close>
+
+text \<open>This semantic proof is taken from theorem "ert_cc" in Coupon_Collector
+    by Johannes Hölzl.
+    The heart of that proof is in essence what constitutes the proof rule @{thm prove_rule}.
+    The application of @{thm lfp_parallel_induct} in there is inspired by the use of that
+    induction scheme in the proof of the inner loop in ert_cc.
+  \<close>
 
 lemma fixes N::nat
   assumes N: "N>1"
@@ -139,8 +146,45 @@ proof -
     apply(subst k) using N apply auto using eq by auto
 qed
 
-  
 
+
+text \<open>We can even generalize it to arbitrary a, and thus obtain the real inner loop
+      of the coupon collector.\<close>
+  
+definition "coco2 N a = Assign ''b'' (\<lambda>s. return_pmf (0)) ;;
+                     Assign ''a'' (\<lambda>s. return_pmf (a)) ;;
+                     innerb N"
+
+
+lemma fixes N::nat
+  assumes N: "N>1" "a<N"
+  shows "ert (compile (coco2 N a)) 0 s = 3 +  (2 * real N / (real N - a))"
+proof -
+
+  { 
+    fix s :: state assume a: "s ''b'' = 0" "a\<le>N" "s ''a''=a" "s ''b'' = 0 \<or> s ''b''=1"
+    have "ert (compile (innerb N)) 0 s = 1 + 2 / (1 - ennreal (a / real N))"
+      unfolding innerb_def
+      apply(subst prove_rule)
+      using a N 
+      by (auto simp: fiid_def unaffected_def Vars_def lift2_def)  
+
+  } note k=this
+ 
+  from N have *: "1 - 1 / real N = (real N - 1) / real N"
+    by(simp add: diff_divide_distrib) 
+  have l: "(2::ennreal) = ennreal 2" by auto
+  have eq: "2 / (1 - ennreal (real a / real N))
+        =  ennreal (2 * real N / (real N - real a))"
+    apply(subst ennreal_1[symmetric]) apply(subst ennreal_minus)
+    using N   apply(auto simp add: divide_ennreal)
+    unfolding l apply(subst divide_ennreal) apply auto 
+    unfolding * 
+    by (metis (mono_tags, hide_lams) Suc_lessD diff_divide_distrib divide_divide_eq_right divide_self_if gr0_implies_Suc of_nat_neq_0)
+
+  show ?thesis unfolding coco2_def apply auto
+    apply(subst k) using N apply auto using eq by auto
+qed
 
 
 
